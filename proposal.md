@@ -4,7 +4,10 @@ Final Project Proposal
 
 ## Director, Genre and Duration: The Secret to Higher Film Ratings
 
-## Motivation
+*Satya Batna (ssb2231), Ruby He (yh3824), Nicolette Lim (nrl2142),
+Amanda Sy (ars2376), Kallan Roan (kr3145)*
+
+### Motivation
 
 We are a group of passionate movie enthusiasts who are eager to dive
 into the Letterboxd dataset to uncover fascinating insights about films.
@@ -15,3 +18,18 @@ top-rated films: Do certain directors excel when they stick to a
 specific genre or keep their films under 90 minutes? Beyond that, we are
 excited to analyze trends in genre preferences and discover what kind of
 film would captivate audiences.
+
+### Final Deliverables
+
+### Data Source
+
+We will be using this [Letterbox Movie
+Classification](https://www.kaggle.com/datasets/sahilislam007/letterbox-movie-classification-dataset)
+dataset from [Kaggle](https://www.kaggle.com/). It has 10,002
+observations with 17 variables. Variables that we may be interested in
+investigating include genre, director, runtime, rating, watches, and
+likes.
+
+### Anticipated Analyses/Visualizations/Coding Challenges
+
+### Timeline
