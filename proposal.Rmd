@@ -6,3 +6,4 @@ output: github_document
 
 ## Tentative Title
 
+this is Amanda
