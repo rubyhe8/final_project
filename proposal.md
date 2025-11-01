@@ -19,7 +19,17 @@ specific genre or keep their films under 90 minutes? Beyond that, we are
 excited to analyze trends in genre preferences and discover what kind of
 film would captivate audiences.
 
-### Final Deliverables
+### Final Products
+
+Final products will be a written report, webpage, and screencast. The
+report will describe an overview of the project, initial questions about
+the topic, the data collection and cleaning process, exploratory
+analyses, a discussion of our results, and any changes we made to our
+project over time. The second product will be a webpage that is easily
+accessible to a broad audience and gives a summary of the project scope,
+data, approaches, visualizations, and other results. The last product
+will be a two-minute narrated screencast that illustrates our project
+using relevant visual. aids.
 
 ### Data Source
 

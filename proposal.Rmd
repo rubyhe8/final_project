@@ -10,8 +10,9 @@ output: github_document
 ### Motivation 
 We are a group of passionate movie enthusiasts who are eager to dive into the Letterboxd dataset to uncover fascinating insights about films. In an era dominated by short-form content and claims of shorter attention spans, we are curious to see if shorter movies tend to receive higher ratings. We also want to explore the secret formulas behind top-rated films: Do certain directors excel when they stick to a specific genre or keep their films under 90 minutes? Beyond that, we are excited to analyze trends in genre preferences and discover what kind of film would captivate audiences. 
 
-### Final Deliverables 
+### Final Products 
 
+Final products will be a written report, webpage, and screencast. The report will describe an overview of the project, initial questions about the topic, the data collection and cleaning process, exploratory analyses, a discussion of our results, and any changes we made to our project over time. The second product will be a webpage that is easily accessible to a broad audience and gives a summary of the project scope, data, approaches, visualizations, and other results. The last product will be a two-minute narrated screencast that illustrates our project using relevant visual. aids.
 
 ### Data Source 
 
