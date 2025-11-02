@@ -2,7 +2,7 @@ Final Project Proposal
 ================
 2025-10-31
 
-## Director, Genre and Duration: The Secret to Higher Film Ratings
+## Director, Genre, and Duration: The Secret to Higher Film Ratings
 
 *Satya Batna (ssb2231), Ruby He (yh3824), Nicolette Lim (nrl2142),
 Amanda Sy (ars2376), Kallan Roan (kr3145)*
@@ -29,7 +29,7 @@ project over time. The second product will be a webpage that is easily
 accessible to a broad audience and gives a summary of the project scope,
 data, approaches, visualizations, and other results. The last product
 will be a two-minute narrated screencast that illustrates our project
-using relevant visual. aids.
+using relevant visual aids.
 
 ### Data Source
 
@@ -41,6 +41,28 @@ investigating include genre, director, runtime, rating, watches, and
 likes.
 
 ### Anticipated Analyses/Visualizations/Coding Challenges
+
+Exploratory analyses will identify patterns and potential relationships
+among variables such as average ratings, likes, watches, list
+appearances, and runtime across genres, studios, and directors. These
+will be visualized using box plots, bar plots, histograms, and scatter
+plots. Bar plots will be used to explore which directors are associated
+with the most movies or film genres.
+
+Statistical analyses using linear regression will identify which
+predictors are significantly associated with film ratings, and assess
+whether they vary by directors, genres, or runtime. More specifically,
+we will test whether the associations between genres or runtime (under
+90 minutes) and ratings vary across directors. We will also test which
+predictors are significantly associated with a film’s number of list
+appearances.
+
+A main coding challenge is navigating data cleaning for analyses. Some
+variables, such as directors, genres, and studios, can contain multiple
+values nested inside a signal cell for each film. We would need to clean
+the dataset to ensure each cell contains a singular, scalar value for
+analysis. Additional data cleaning steps include ensuring our data is in
+a long format and managing missing values for key variables.
 
 ### Timeline
 
@@ -59,7 +81,9 @@ likes.
 
 <u>**Nov 10th–14th**</u> – Zoom Meeting for Project Review
 
-<u>**Nov 15th**</u> – Short Team Meeting \* Division of Tasks
+<u>**Nov 15th**</u> – Short Team Meeting
+
+- Division of Tasks
 
 <u>**Nov 21st @ 9pm**</u> – Team Meeting for Troubleshooting
 
