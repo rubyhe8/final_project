@@ -1,0 +1,126 @@
+---
+title: "Data Cleaning"
+output: github_document
+date: "2025-11-24"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+```
+
+
+Improting the Data, filter only English-language films 
+```{r}
+movie_df = read.csv("data/letterbox_movie_classification_dataset.csv") |>
+  janitor::clean_names() |>
+  filter(original_language == "English") |>
+  select(film_title, director, average_rating, genres, runtime, original_language, description, studios, watches, list_appearances, likes, fans, lowest, medium, highest, total_ratings) 
+```
+
+EDA - genre count
+```{r}
+genre_count = 
+  movie_df |>
+  group_by(genres) |>
+  summarise(film_count = n()) |>
+  arrange (desc(film_count))
+
+print (genre_count)
+```
+
+EDA - top 5 films based on watches (mainstream popularity)
+```{r}
+top_films = 
+  movie_df |>
+  arrange(desc(watches)) |>
+  select(film_title, director, watches) |>
+  slice_head(n = 5)
+
+print(top_films)
+
+```
+
+EDA - top 5 films based on average rating (critical acclaim)
+```{r}
+top_rated = 
+  movie_df |>
+  arrange(desc(average_rating)) |>
+  select(film_title, director, average_rating) |>
+  slice_head(n = 5)
+
+print(top_rated)
+
+```
+
+EDA - distribution of movie runtimes (please edit the aesthetics of it)
+```{r}
+ggplot(movie_df, aes(x = runtime)) +
+  geom_histogram () +
+  labs (title = "Distribution of Movie Runtimes",
+        x = "Runtime (minutes)", y = "Count")
+```
+
+Is this an EDA? - relationship between list appearances and likes (please edit the aesthetics of it)
+```{r}
+ggplot(movie_df, aes(x=list_appearances, y = likes)) +
+  geom_point (alpha = 0.5) +
+  geom_smooth () + 
+  labs (title = "Relationship between List Appearances and Likes",
+        x = "List Appearances", y = "Likes")
+```
+
+Is this an EDA? - relationship between runtime and average rating (please edit the aesthetics of it)
+```{r}
+ggplot(movie_df, aes(x=runtime, y=average_rating)) +
+  geom_point(alpha=0.5) +
+  geom_smooth() +
+  labs (title = "Relationship between Runtime and Average Rating",
+        x = "Runtime (minutes)", y = "Average Rating")
+```
+
+Cont. EDA of relationship between runtime and average rating
+```{r}
+runtime_rate_df =
+  movie_df |>
+  mutate(runtime_category = case_when(
+    runtime <= 90 ~ "Short",
+    runtime > 90 & runtime <= 120 ~ "Medium",
+    runtime > 120 ~ "Long"
+  ))
+
+runtime_rate_df |>
+  group_by (runtime_category) |>
+  summarise (avg_rating = mean(average_rating, na.rm = TRUE)) |>
+  arrange (desc(avg_rating))
+
+```
+
+The next two chunks of code is the same, only nature of run time variable is different 
+
+
+Linear Regression Model to further analyze the relationship between run time and average rating (run time as continuous variable)
+```{r}
+runtime_rate_model_cont = lm(average_rating ~ runtime, data = movie_df)
+```
+
+Linear Regression Model to further analyze the relationship (run time as categorical variable )
+```{r}
+runtime_rate_model_cat = lm(average_rating ~runtime_category, data = runtime_rate_df)
+```
+
+The next two chunks of code is the same, only nature of run time vairable is different 
+
+Linear Regression Model to analyze the relationship between watches and run time (run time as cont. variable)
+```{r}
+runtime_watch_model_cont = lm(watches ~ runtime, data = movie_df)
+```
+
+Linear Regression Model to analyze the relationship between watches and run time (run time as categorical variable)
+```{r}
+runtime_watch_model_cat = lm(watches ~ runtime_category, data = runtime_rate_df)
+```
+
