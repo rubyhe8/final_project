@@ -18,15 +18,18 @@ Improting the Data, filter only English-language films
 movie_df = read.csv("data/letterbox_movie_classification_dataset.csv") |>
   janitor::clean_names() |>
   filter(original_language == "English") |>
-  select(film_title, director, average_rating, genres, runtime, original_language, description, studios, watches, list_appearances, likes, fans, lowest, medium, highest, total_ratings) |> 
-  mutate(genres = str_remove_all(genres, "\\[|\\]|'")) |>
-  separate_rows(genres, sep = ",\\s*") 
+  select(film_title, director, average_rating, genres, runtime, original_language, description, studios, watches, list_appearances, likes, fans, lowest, medium, highest, total_ratings)
 ```
 
 EDA - genre count
 ```{r}
+genre_df = movie_df |>
+  mutate(genres = map_chr(genres, ~ paste(.x, collapse = ","))) |> 
+  mutate(genres = str_remove_all(genres, "\\[|\\]|'")) |>
+  separate_rows(genres, sep = ",\\s*")
+
 genre_count = 
-  movie_df |>
+  genre_df |>
   group_by(genres) |>
   summarise(film_count = n()) |>
   arrange (desc(film_count))

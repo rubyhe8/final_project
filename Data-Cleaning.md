@@ -23,16 +23,19 @@ Improting the Data, filter only English-language films
 movie_df = read.csv("data/letterbox_movie_classification_dataset.csv") |>
   janitor::clean_names() |>
   filter(original_language == "English") |>
-  select(film_title, director, average_rating, genres, runtime, original_language, description, studios, watches, list_appearances, likes, fans, lowest, medium, highest, total_ratings) |> 
-  mutate(genres = str_remove_all(genres, "\\[|\\]|'")) |>
-  separate_rows(genres, sep = ",\\s*") 
+  select(film_title, director, average_rating, genres, runtime, original_language, description, studios, watches, list_appearances, likes, fans, lowest, medium, highest, total_ratings)
 ```
 
 EDA - genre count
 
 ``` r
+genre_df = movie_df |>
+  mutate(genres = map_chr(genres, ~ paste(.x, collapse = ","))) |> 
+  mutate(genres = str_remove_all(genres, "\\[|\\]|'")) |>
+  separate_rows(genres, sep = ",\\s*")
+
 genre_count = 
-  movie_df |>
+  genre_df |>
   group_by(genres) |>
   summarise(film_count = n()) |>
   arrange (desc(film_count))
@@ -67,14 +70,12 @@ top_films =
 print(top_films)
 ```
 
-    ## # A tibble: 5 × 3
-    ##   film_title   director          watches
-    ##   <chr>        <chr>               <int>
-    ## 1 Barbie       Greta Gerwig      5195503
-    ## 2 Barbie       Greta Gerwig      5195503
-    ## 3 Fight Club   David Fincher     5059722
-    ## 4 Interstellar Christopher Nolan 5044987
-    ## 5 Interstellar Christopher Nolan 5044987
+    ##        film_title          director watches
+    ## 1          Barbie      Greta Gerwig 5195503
+    ## 2      Fight Club     David Fincher 5059722
+    ## 3    Interstellar Christopher Nolan 5044987
+    ## 4           Joker     Todd Phillips 4952400
+    ## 5 The Dark Knight Christopher Nolan 4488171
 
 EDA - top 5 films based on average rating (critical acclaim)
 
@@ -88,14 +89,18 @@ top_rated =
 print(top_rated)
 ```
 
-    ## # A tibble: 5 × 3
-    ##   film_title                                 director       average_rating
-    ##   <chr>                                      <chr>                   <dbl>
-    ## 1 Radiohead: In Rainbows - From the Basement David Barnard            4.71
-    ## 2 Radiohead: In Rainbows - From the Basement David Barnard            4.71
-    ## 3 Stop Making Sense                          Jonathan Demme           4.68
-    ## 4 Stop Making Sense                          Jonathan Demme           4.68
-    ## 5 12 Angry Men                               Sidney Lumet             4.63
+    ##                                   film_title                         director
+    ## 1 Radiohead: In Rainbows - From the Basement                    David Barnard
+    ## 2                          Stop Making Sense                   Jonathan Demme
+    ## 3                               12 Angry Men                     Sidney Lumet
+    ## 4                                 Twin Peaks                      David Lynch
+    ## 5                            Planet Earth II Elizabeth White, Justin Anderson
+    ##   average_rating
+    ## 1           4.71
+    ## 2           4.68
+    ## 3           4.63
+    ## 4           4.63
+    ## 5           4.63
 
 EDA - distribution of movie runtimes (please edit the aesthetics of it)
 
@@ -160,9 +165,9 @@ runtime_rate_df |>
     ## # A tibble: 3 × 2
     ##   runtime_category avg_rating
     ##   <chr>                 <dbl>
-    ## 1 Long                   3.44
-    ## 2 Medium                 3.16
-    ## 3 Short                  3.10
+    ## 1 Long                   3.48
+    ## 2 Medium                 3.18
+    ## 3 Short                  3.12
 
 The next two chunks of code is the same, only nature of run time
 variable is different
