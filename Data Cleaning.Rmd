@@ -13,7 +13,7 @@ library(tidyverse)
 ```
 
 
-Improting the Data, filter only English-language films 
+Importing the Data, filter only English-language films 
 ```{r}
 movie_df = read.csv("data/letterbox_movie_classification_dataset.csv") |>
   janitor::clean_names() |>
@@ -21,7 +21,7 @@ movie_df = read.csv("data/letterbox_movie_classification_dataset.csv") |>
   select(film_title, director, average_rating, genres, runtime, original_language, description, studios, watches, list_appearances, likes, fans, lowest, medium, highest, total_ratings)
 ```
 
-EDA - genre df cleaning and genre count
+EDA - genre count
 ```{r}
 genre_df = movie_df |>
   mutate(genres = str_remove_all(genres, "\\[|\\]|'")) |>
@@ -35,19 +35,24 @@ genre_count =
 
 print (genre_count)
 
+```
+
+EDA - genre df pivot wider 
+
+```{r}
 genre_wide = genre_df |> 
-  mutate(studios = map_chr(studios, ~ paste(.x, collapse = ", ")),
+  mutate(
+    studios = as.character(studios),
     description = as.character(description),
-    genres = map_chr(genres, ~ paste(.x, collapse = ","))
+    genres = as.character(genres)
   ) |> 
-  mutate(genres = map_chr(genres, ~ paste(.x, collapse = ","))) |>
   mutate(value = 1) |> 
   group_by(
     film_title, director, average_rating, runtime, original_language,
     description, studios, watches, list_appearances, likes, fans,
     lowest, medium, highest, total_ratings, genres
   ) |> 
-   summarise(value = max(value), .groups = "drop") |> 
+  summarise(value = max(value), .groups = "drop") |> 
   pivot_wider(
     id_cols = c(
       film_title, director, average_rating, runtime, original_language,
@@ -57,7 +62,8 @@ genre_wide = genre_df |>
     names_from = genres,
     values_from = value,
     values_fill = 0
-  )
+  ) |> 
+  janitor::clean_names()
 ```
 
 EDA - top 5 films based on watches (mainstream popularity)

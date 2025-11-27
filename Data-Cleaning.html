@@ -289,12 +289,12 @@ $(document).ready(function () {
 ## ✖ dplyr::filter() masks stats::filter()
 ## ✖ dplyr::lag()    masks stats::lag()
 ## ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
-<p>Improting the Data, filter only English-language films</p>
+<p>Importing the Data, filter only English-language films</p>
 <pre class="r"><code>movie_df = read.csv(&quot;data/letterbox_movie_classification_dataset.csv&quot;) |&gt;
   janitor::clean_names() |&gt;
   filter(original_language == &quot;English&quot;) |&gt;
   select(film_title, director, average_rating, genres, runtime, original_language, description, studios, watches, list_appearances, likes, fans, lowest, medium, highest, total_ratings)</code></pre>
-<p>EDA - genre df cleaning and genre count</p>
+<p>EDA - genre count</p>
 <pre class="r"><code>genre_df = movie_df |&gt;
   mutate(genres = str_remove_all(genres, &quot;\\[|\\]|&#39;&quot;)) |&gt;
   separate_rows(genres, sep = &quot;,\\s*&quot;)
@@ -320,19 +320,20 @@ print (genre_count)</code></pre>
 ##  9 Science Fiction       1070
 ## 10 Fantasy                769
 ## # ℹ 20 more rows</code></pre>
+<p>EDA - genre df pivot wider</p>
 <pre class="r"><code>genre_wide = genre_df |&gt; 
-  mutate(studios = map_chr(studios, ~ paste(.x, collapse = &quot;, &quot;)),
+  mutate(
+    studios = as.character(studios),
     description = as.character(description),
-    genres = map_chr(genres, ~ paste(.x, collapse = &quot;,&quot;))
+    genres = as.character(genres)
   ) |&gt; 
-  mutate(genres = map_chr(genres, ~ paste(.x, collapse = &quot;,&quot;))) |&gt;
   mutate(value = 1) |&gt; 
   group_by(
     film_title, director, average_rating, runtime, original_language,
     description, studios, watches, list_appearances, likes, fans,
     lowest, medium, highest, total_ratings, genres
   ) |&gt; 
-   summarise(value = max(value), .groups = &quot;drop&quot;) |&gt; 
+  summarise(value = max(value), .groups = &quot;drop&quot;) |&gt; 
   pivot_wider(
     id_cols = c(
       film_title, director, average_rating, runtime, original_language,
@@ -342,7 +343,8 @@ print (genre_count)</code></pre>
     names_from = genres,
     values_from = value,
     values_fill = 0
-  )</code></pre>
+  ) |&gt; 
+  janitor::clean_names()</code></pre>
 <p>EDA - top 5 films based on watches (mainstream popularity)</p>
 <pre class="r"><code>top_films = 
   movie_df |&gt;
@@ -384,7 +386,7 @@ it)</p>
   labs (title = &quot;Distribution of Movie Runtimes&quot;,
         x = &quot;Runtime (minutes)&quot;, y = &quot;Count&quot;)</code></pre>
 <pre><code>## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
-<p><img src="Data-Cleaning_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<p><img src="Data-Cleaning_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
 <p>Is this an EDA? - relationship between list appearances and likes
 (please edit the aesthetics of it)</p>
 <pre class="r"><code>ggplot(movie_df, aes(x=list_appearances, y = likes)) +
@@ -393,7 +395,7 @@ it)</p>
   labs (title = &quot;Relationship between List Appearances and Likes&quot;,
         x = &quot;List Appearances&quot;, y = &quot;Likes&quot;)</code></pre>
 <pre><code>## `geom_smooth()` using method = &#39;gam&#39; and formula = &#39;y ~ s(x, bs = &quot;cs&quot;)&#39;</code></pre>
-<p><img src="Data-Cleaning_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+<p><img src="Data-Cleaning_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
 <p>Is this an EDA? - relationship between runtime and average rating
 (please edit the aesthetics of it)</p>
 <pre class="r"><code>ggplot(movie_df, aes(x=runtime, y=average_rating)) +
@@ -402,7 +404,7 @@ it)</p>
   labs (title = &quot;Relationship between Runtime and Average Rating&quot;,
         x = &quot;Runtime (minutes)&quot;, y = &quot;Average Rating&quot;)</code></pre>
 <pre><code>## `geom_smooth()` using method = &#39;gam&#39; and formula = &#39;y ~ s(x, bs = &quot;cs&quot;)&#39;</code></pre>
-<p><img src="Data-Cleaning_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+<p><img src="Data-Cleaning_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
 <p>Cont. EDA of relationship between runtime and average rating</p>
 <pre class="r"><code>runtime_rate_df =
   movie_df |&gt;
