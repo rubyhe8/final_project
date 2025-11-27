@@ -21,10 +21,9 @@ movie_df = read.csv("data/letterbox_movie_classification_dataset.csv") |>
   select(film_title, director, average_rating, genres, runtime, original_language, description, studios, watches, list_appearances, likes, fans, lowest, medium, highest, total_ratings)
 ```
 
-EDA - genre count
+EDA - genre df cleaning and genre count
 ```{r}
 genre_df = movie_df |>
-  mutate(genres = map_chr(genres, ~ paste(.x, collapse = ","))) |> 
   mutate(genres = str_remove_all(genres, "\\[|\\]|'")) |>
   separate_rows(genres, sep = ",\\s*")
 
@@ -35,6 +34,30 @@ genre_count =
   arrange (desc(film_count))
 
 print (genre_count)
+
+genre_wide = genre_df |> 
+  mutate(studios = map_chr(studios, ~ paste(.x, collapse = ", ")),
+    description = as.character(description),
+    genres = map_chr(genres, ~ paste(.x, collapse = ","))
+  ) |> 
+  mutate(genres = map_chr(genres, ~ paste(.x, collapse = ","))) |>
+  mutate(value = 1) |> 
+  group_by(
+    film_title, director, average_rating, runtime, original_language,
+    description, studios, watches, list_appearances, likes, fans,
+    lowest, medium, highest, total_ratings, genres
+  ) |> 
+   summarise(value = max(value), .groups = "drop") |> 
+  pivot_wider(
+    id_cols = c(
+      film_title, director, average_rating, runtime, original_language,
+      description, studios, watches, list_appearances, likes, fans,
+      lowest, medium, highest, total_ratings
+    ),
+    names_from = genres,
+    values_from = value,
+    values_fill = 0
+  )
 ```
 
 EDA - top 5 films based on watches (mainstream popularity)
