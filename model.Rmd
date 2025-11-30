@@ -8,16 +8,6 @@ output:
 
 This will include all code for building our model 
 
-We hypothesize 
-
-Run time (continuous)
-Total times watched (count)
-Genre (categorical) top 5 genres only
-Number of watches 
-List appearances 
-Fans
-Likes 
-Total ratings
 
 ```{r message = FALSE}
 library(tidyverse)
@@ -50,7 +40,7 @@ import in movie_df
 model_movie_df = read.csv("data/letterbox_movie_classification_dataset.csv") |>
   janitor::clean_names() |>
   filter(original_language == "English") |>
-  select(average_rating, genres, runtime, watches, list_appearances, likes, fans, lowest, medium, highest, total_ratings)
+  select(average_rating, runtime, watches, list_appearances, likes, fans, lowest, medium, highest, total_ratings)
 ```
 
 
@@ -94,7 +84,6 @@ linear model
 ```{r}
 linear_model = lm(average_rating ~ runtime + list_appearances + watches + fans, data = model_movie_df)
 
-summary(linear_model)
 
 model_movie_df |> 
   add_predictions(linear_model) |> 
@@ -158,13 +147,27 @@ cv_df |>
   ggplot(aes(x = model, y = rmse)) + geom_violin()
 ```
 
-we want to use a smooth model > a linear model 
+we want to use a smooth model > a linear model
 
-* also seen in the plot of resid vs. pred - the smooth model is not evenly distributed across resid = 0
+* smooth model has lower rmse
+* also seen in the plot of resid vs. pred - the linear model is not evenly distributed across resid = 0
 
-Our final model is a generalized additive model with the following predictors 
+
+The optimal model that we think predicts `average_rating` is a generalized additive model containing the following predictors:
 
 * runtime 
 * list appearances 
 * watches
 * fans
+
+```{r}
+summary(gam_model)
+```
+
+significant p-value suggests that the non-linear relationship between the predictor and the response is statistically significant
+
+if we want to use a linear model 
+```{r}
+summary(linear_model)
+```
+

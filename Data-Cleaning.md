@@ -6,18 +6,7 @@ Data Cleaning
 library(tidyverse)
 ```
 
-    ## ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
-    ## ✔ dplyr     1.1.4     ✔ readr     2.1.5
-    ## ✔ forcats   1.0.0     ✔ stringr   1.5.2
-    ## ✔ ggplot2   3.5.2     ✔ tibble    3.3.0
-    ## ✔ lubridate 1.9.4     ✔ tidyr     1.3.1
-    ## ✔ purrr     1.1.0     
-    ## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
-    ## ✖ dplyr::filter() masks stats::filter()
-    ## ✖ dplyr::lag()    masks stats::lag()
-    ## ℹ Use the conflicted package (<http://conflicted.r-lib.org/>) to force all conflicts to become errors
-
-Improting the Data, filter only English-language films
+Importing the Data, filter only English-language films
 
 ``` r
 movie_df = read.csv("data/letterbox_movie_classification_dataset.csv") |>
@@ -30,7 +19,6 @@ EDA - genre count
 
 ``` r
 genre_df = movie_df |>
-  mutate(genres = map_chr(genres, ~ paste(.x, collapse = ","))) |> 
   mutate(genres = str_remove_all(genres, "\\[|\\]|'")) |>
   separate_rows(genres, sep = ",\\s*")
 
@@ -57,6 +45,35 @@ print (genre_count)
     ##  9 Science Fiction       1070
     ## 10 Fantasy                769
     ## # ℹ 20 more rows
+
+EDA - genre df pivot wider
+
+``` r
+genre_wide = genre_df |> 
+  mutate(
+    studios = as.character(studios),
+    description = as.character(description),
+    genres = as.character(genres)
+  ) |> 
+  mutate(value = 1) |> 
+  group_by(
+    film_title, director, average_rating, runtime, original_language,
+    description, studios, watches, list_appearances, likes, fans,
+    lowest, medium, highest, total_ratings, genres
+  ) |> 
+  summarise(value = max(value), .groups = "drop") |> 
+  pivot_wider(
+    id_cols = c(
+      film_title, director, average_rating, runtime, original_language,
+      description, studios, watches, list_appearances, likes, fans,
+      lowest, medium, highest, total_ratings
+    ),
+    names_from = genres,
+    values_from = value,
+    values_fill = 0
+  ) |> 
+  janitor::clean_names()
+```
 
 EDA - top 5 films based on watches (mainstream popularity)
 
@@ -113,7 +130,7 @@ ggplot(movie_df, aes(x = runtime)) +
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-![](Data-Cleaning_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
+![](Data-Cleaning_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
 
 Is this an EDA? - relationship between list appearances and likes
 (please edit the aesthetics of it)
@@ -128,7 +145,7 @@ ggplot(movie_df, aes(x=list_appearances, y = likes)) +
 
     ## `geom_smooth()` using method = 'gam' and formula = 'y ~ s(x, bs = "cs")'
 
-![](Data-Cleaning_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+![](Data-Cleaning_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
 
 Is this an EDA? - relationship between runtime and average rating
 (please edit the aesthetics of it)
@@ -143,7 +160,7 @@ ggplot(movie_df, aes(x=runtime, y=average_rating)) +
 
     ## `geom_smooth()` using method = 'gam' and formula = 'y ~ s(x, bs = "cs")'
 
-![](Data-Cleaning_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
+![](Data-Cleaning_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
 
 Cont. EDA of relationship between runtime and average rating
 

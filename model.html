@@ -16,7 +16,7 @@
 <script src="site_libs/header-attrs-2.29/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<link href="site_libs/bootstrap-3.3.5/css/cerulean.min.css" rel="stylesheet" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
 <script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
@@ -356,10 +356,6 @@ div.tocify {
 
 
 <p>This will include all code for building our model</p>
-<p>We hypothesize</p>
-<p>Run time (continuous) Total times watched (count) Genre (categorical)
-top 5 genres only Number of watches List appearances Fans Likes Total
-ratings</p>
 <pre class="r"><code>library(tidyverse)
 library(mgcv)
 library(modelr)
@@ -387,7 +383,7 @@ set.seed(1)</code></pre>
 <pre class="r"><code>model_movie_df = read.csv(&quot;data/letterbox_movie_classification_dataset.csv&quot;) |&gt;
   janitor::clean_names() |&gt;
   filter(original_language == &quot;English&quot;) |&gt;
-  select(average_rating, genres, runtime, watches, list_appearances, likes, fans, lowest, medium, highest, total_ratings)</code></pre>
+  select(average_rating, runtime, watches, list_appearances, likes, fans, lowest, medium, highest, total_ratings)</code></pre>
 <p>fit a <code>lasso</code> model using <code>glmnet</code></p>
 <pre class="r"><code>x = model.matrix(average_rating ~ ., model_movie_df) [,-1]
 y = model_movie_df |&gt; pull(average_rating)</code></pre>
@@ -407,20 +403,15 @@ lasso_fit_opt = glmnet(x, y, lambda = lambda_opt)
 
 lasso_fit_opt |&gt; 
   broom::tidy()</code></pre>
-<pre><code>## # A tibble: 175 × 5
-##    term                                           step estimate lambda dev.ratio
-##    &lt;chr&gt;                                         &lt;dbl&gt;    &lt;dbl&gt;  &lt;dbl&gt;     &lt;dbl&gt;
-##  1 (Intercept)                                       1  2.99      0.01     0.446
-##  2 genres[&#39;Action&#39;, &#39;Adventure&#39;, &#39;Comedy&#39;, &#39;Ani…     1 -0.870     0.01     0.446
-##  3 genres[&#39;Action&#39;, &#39;Adventure&#39;, &#39;Drama&#39;, &#39;Fant…     1 -0.455     0.01     0.446
-##  4 genres[&#39;Action&#39;, &#39;Adventure&#39;, &#39;Drama&#39;]            1 -0.0533    0.01     0.446
-##  5 genres[&#39;Action&#39;, &#39;Adventure&#39;, &#39;Fantasy&#39;, &#39;Co…     1 -0.183     0.01     0.446
-##  6 genres[&#39;Action&#39;, &#39;Adventure&#39;, &#39;Fantasy&#39;, &#39;Dr…     1 -0.381     0.01     0.446
-##  7 genres[&#39;Action&#39;, &#39;Comedy&#39;, &#39;Adventure&#39;, &#39;Wes…     1 -0.0320    0.01     0.446
-##  8 genres[&#39;Action&#39;, &#39;Crime&#39;, &#39;Comedy&#39;, &#39;Horror&#39;]     1 -0.240     0.01     0.446
-##  9 genres[&#39;Action&#39;, &#39;Crime&#39;, &#39;Thriller&#39;, &#39;Horro…     1 -0.00315   0.01     0.446
-## 10 genres[&#39;Action&#39;, &#39;Drama&#39;, &#39;Adventure&#39;, &#39;Fant…     1 -0.486     0.01     0.446
-## # ℹ 165 more rows</code></pre>
+<pre><code>## # A tibble: 6 × 5
+##   term              step     estimate lambda dev.ratio
+##   &lt;chr&gt;            &lt;dbl&gt;        &lt;dbl&gt;  &lt;dbl&gt;     &lt;dbl&gt;
+## 1 (Intercept)          1  2.99          0.01     0.327
+## 2 runtime              1  0.00150       0.01     0.327
+## 3 list_appearances     1  0.00000539    0.01     0.327
+## 4 fans                 1 -0.00000135    0.01     0.327
+## 5 lowest               1 -0.0000353     0.01     0.327
+## 6 highest              1 -0.000000477   0.01     0.327</code></pre>
 <p>Lasso model chooses the following predictors</p>
 <ul>
 <li>runtime</li>
@@ -435,30 +426,8 @@ number of highest ratings)</p>
 <p>linear model</p>
 <pre class="r"><code>linear_model = lm(average_rating ~ runtime + list_appearances + watches + fans, data = model_movie_df)
 
-summary(linear_model)</code></pre>
-<pre><code>## 
-## Call:
-## lm(formula = average_rating ~ runtime + list_appearances + watches + 
-##     fans, data = model_movie_df)
-## 
-## Residuals:
-##      Min       1Q   Median       3Q      Max 
-## -2.04642 -0.27131  0.07398  0.31200  1.66101 
-## 
-## Coefficients:
-##                    Estimate Std. Error t value Pr(&gt;|t|)    
-## (Intercept)       2.942e+00  1.572e-02 187.172  &lt; 2e-16 ***
-## runtime           1.577e-03  1.465e-04  10.762  &lt; 2e-16 ***
-## list_appearances  6.758e-06  2.387e-07  28.307  &lt; 2e-16 ***
-## watches          -4.313e-07  2.617e-08 -16.481  &lt; 2e-16 ***
-## fans             -2.294e-06  7.741e-07  -2.963  0.00305 ** 
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## 
-## Residual standard error: 0.4714 on 8069 degrees of freedom
-## Multiple R-squared:  0.1906, Adjusted R-squared:  0.1902 
-## F-statistic: 475.1 on 4 and 8069 DF,  p-value: &lt; 2.2e-16</code></pre>
-<pre class="r"><code>model_movie_df |&gt; 
+
+model_movie_df |&gt; 
   add_predictions(linear_model) |&gt; 
   add_residuals(linear_model) |&gt; 
   ggplot(aes(x = pred, y = resid)) +
@@ -525,17 +494,70 @@ cv_df |&gt;
 <p><img src="model_files/figure-html/unnamed-chunk-7-1.png" width="90%" /></p>
 <p>we want to use a smooth model &gt; a linear model</p>
 <ul>
-<li>also seen in the plot of resid vs. pred - the smooth model is not
+<li>smooth model has lower rmse</li>
+<li>also seen in the plot of resid vs. pred - the linear model is not
 evenly distributed across resid = 0</li>
 </ul>
-<p>Our final model is a generalized additive model with the following
-predictors</p>
+<p>The optimal model that we think predicts <code>average_rating</code>
+is a generalized additive model containing the following predictors:</p>
 <ul>
 <li>runtime</li>
 <li>list appearances</li>
 <li>watches</li>
 <li>fans</li>
 </ul>
+<pre class="r"><code>summary(gam_model)</code></pre>
+<pre><code>## 
+## Family: gaussian 
+## Link function: identity 
+## 
+## Formula:
+## average_rating ~ s(runtime) + s(list_appearances) + s(watches) + 
+##     s(fans)
+## 
+## Parametric coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept) 3.210954   0.004562   703.8   &lt;2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Approximate significance of smooth terms:
+##                       edf Ref.df      F p-value    
+## s(runtime)          8.333  8.846  81.89  &lt;2e-16 ***
+## s(list_appearances) 8.793  8.988 200.14  &lt;2e-16 ***
+## s(watches)          9.000  9.000 186.24  &lt;2e-16 ***
+## s(fans)             8.775  8.983  53.77  &lt;2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## R-sq.(adj) =  0.388   Deviance explained =   39%
+## GCV = 0.16879  Scale est. = 0.16804   n = 8074</code></pre>
+<p>significant p-value suggests that the non-linear relationship between
+the predictor and the response is statistically significant</p>
+<p>if we want to use a linear model</p>
+<pre class="r"><code>summary(linear_model)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = average_rating ~ runtime + list_appearances + watches + 
+##     fans, data = model_movie_df)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -2.04642 -0.27131  0.07398  0.31200  1.66101 
+## 
+## Coefficients:
+##                    Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)       2.942e+00  1.572e-02 187.172  &lt; 2e-16 ***
+## runtime           1.577e-03  1.465e-04  10.762  &lt; 2e-16 ***
+## list_appearances  6.758e-06  2.387e-07  28.307  &lt; 2e-16 ***
+## watches          -4.313e-07  2.617e-08 -16.481  &lt; 2e-16 ***
+## fans             -2.294e-06  7.741e-07  -2.963  0.00305 ** 
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 0.4714 on 8069 degrees of freedom
+## Multiple R-squared:  0.1906, Adjusted R-squared:  0.1902 
+## F-statistic: 475.1 on 4 and 8069 DF,  p-value: &lt; 2.2e-16</code></pre>
 
 
 
