@@ -78,13 +78,90 @@ genre_wide = genre_df |>
 
 ## Runtime vs. Average Rating
 ```{r}
+# Scatterplot 
+movie_df |> 
+  ggplot(aes(runtime, average_rating)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(method = "lm", se = TRUE) +
+  labs(
+    title = "Linear Relationship Between Runtime and Average Rating",
+    x = "Runtime (minutes)",
+    y = "Average Rating"
+  )
+
+runtime_model = lm(average_rating ~ runtime, data = movie_df)
+
+#Hypothesis Test
+runtime_model |> 
+  broom::tidy() |> 
+  select(term, estimate, p.value)
 
 ```
-
 ## Runtime vs. Average Rating, adjusted for covariates
 ```{r}
 
+runtime_adj_model = lm(
+  average_rating ~ runtime + watches + list_appearances + fans,
+  data = movie_df
+)
+
+runtime_adj_model |> 
+  broom::tidy() |> 
+  select(term, estimate, p.value)
+
 ```
+
+```{r}
+## Log-Transformed Runtime vs Average Rating
+
+# Scatterplot with log(runtime)
+movie_df |> 
+  ggplot(aes(x = log(runtime), y = average_rating)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(method = "lm", se = TRUE) +
+  labs(
+    title = "Relationship Between log(Runtime) and Average Rating",
+    x = "log(Runtime)",
+    y = "Average Rating"
+  )
+
+```
+```{r}
+# Model with log-transformed runtime
+runtime_log_model = lm(average_rating ~ log(runtime), data = movie_df)
+
+runtime_log_model |> 
+  broom::tidy() |> 
+  select(term, estimate, p.value)
+```
+
+Dictotomizing Runtime (above and below 90 mins)
+```{r}
+movie_df = movie_df |>
+  mutate(
+    runtime_cat = if_else(runtime < 90, "Short (<90 min)", "Long (≥90 min)")
+  )
+runtime_interaction_model = lm(
+  average_rating ~ runtime * runtime_cat,
+  data = movie_df
+)
+
+runtime_interaction_model |> 
+  broom::tidy() |> 
+  select(term, estimate, p.value)
+movie_df |>
+  ggplot(aes(x = runtime, y = average_rating, color = runtime_cat)) +
+  geom_point(alpha = 0.4) +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(
+    title = "Interaction Between Runtime and Runtime Category",
+    x = "Runtime (minutes)",
+    y = "Average Rating",
+    color = "Runtime Category"
+  )
+
+```
+WRITE INTERPRETATION
 
 ## Appearances in User-Curated Lists vs. Average Rating
 ```{r}
