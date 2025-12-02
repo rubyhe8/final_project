@@ -83,7 +83,7 @@ movie_df |>
   geom_point(alpha = 0.6) +
   geom_smooth(method = "lm", se = TRUE) +
   labs(
-    title = "Relationship Between Runtime and Average Rating",
+    title = "Linear Relationship Between Runtime and Average Rating",
     x = "Runtime (minutes)",
     y = "Average Rating"
   )
@@ -96,7 +96,6 @@ runtime_model |>
   select(term, estimate, p.value)
 
 ```
-WRITE INTREPRATION
 ## Runtime vs. Average Rating, adjusted for covariates
 ```{r}
 

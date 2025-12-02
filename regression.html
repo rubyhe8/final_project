@@ -426,7 +426,7 @@ movie_df |&gt;
   geom_point(alpha = 0.6) +
   geom_smooth(method = &quot;lm&quot;, se = TRUE) +
   labs(
-    title = &quot;Relationship Between Runtime and Average Rating&quot;,
+    title = &quot;Linear Relationship Between Runtime and Average Rating&quot;,
     x = &quot;Runtime (minutes)&quot;,
     y = &quot;Average Rating&quot;
   )</code></pre>
@@ -443,8 +443,10 @@ runtime_model |&gt;
 ##   &lt;chr&gt;          &lt;dbl&gt;    &lt;dbl&gt;
 ## 1 (Intercept)  2.95    0       
 ## 2 runtime      0.00258 1.04e-59</code></pre>
-<p>WRITE INTREPRATION ## Runtime vs. Average Rating, adjusted for
-covariates</p>
+</div>
+<div id="runtime-vs.-average-rating-adjusted-for-covariates"
+class="section level2">
+<h2>Runtime vs. Average Rating, adjusted for covariates</h2>
 <pre class="r"><code>runtime_adj_model = lm(
   average_rating ~ runtime + watches + list_appearances + fans,
   data = movie_df
