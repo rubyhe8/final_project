@@ -455,7 +455,64 @@ runtime_adj_model |&gt;
 ## 3 watches          -0.000000431 4.77e- 60
 ## 4 list_appearances  0.00000676  3.78e-168
 ## 5 fans             -0.00000229  3.05e-  3</code></pre>
-<p>WRITE INTERPRETATION</p>
+<pre class="r"><code>## Log-Transformed Runtime vs Average Rating
+
+# Scatterplot with log(runtime)
+movie_df |&gt; 
+  ggplot(aes(x = log(runtime), y = average_rating)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(method = &quot;lm&quot;, se = TRUE) +
+  labs(
+    title = &quot;Relationship Between log(Runtime) and Average Rating&quot;,
+    x = &quot;log(Runtime)&quot;,
+    y = &quot;Average Rating&quot;
+  )</code></pre>
+<pre><code>## `geom_smooth()` using formula = &#39;y ~ x&#39;</code></pre>
+<p><img src="regression_files/figure-html/unnamed-chunk-7-1.png" width="90%" /></p>
+<pre class="r"><code># Model with log-transformed runtime
+runtime_log_model = lm(average_rating ~ log(runtime), data = movie_df)
+
+runtime_log_model |&gt; 
+  broom::tidy() |&gt; 
+  select(term, estimate, p.value)</code></pre>
+<pre><code>## # A tibble: 2 × 3
+##   term         estimate       p.value
+##   &lt;chr&gt;           &lt;dbl&gt;         &lt;dbl&gt;
+## 1 (Intercept)    2.85   0            
+## 2 log(runtime)   0.0790 0.00000000937</code></pre>
+<p>Dictotomizing Runtime (above and below 90 mins)</p>
+<pre class="r"><code>movie_df = movie_df |&gt;
+  mutate(
+    runtime_cat = if_else(runtime &lt; 90, &quot;Short (&lt;90 min)&quot;, &quot;Long (≥90 min)&quot;)
+  )
+runtime_interaction_model = lm(
+  average_rating ~ runtime * runtime_cat,
+  data = movie_df
+)
+
+runtime_interaction_model |&gt; 
+  broom::tidy() |&gt; 
+  select(term, estimate, p.value)</code></pre>
+<pre><code>## # A tibble: 4 × 3
+##   term                               estimate  p.value
+##   &lt;chr&gt;                                 &lt;dbl&gt;    &lt;dbl&gt;
+## 1 (Intercept)                         2.83    0       
+## 2 runtime                             0.00363 3.88e-83
+## 3 runtime_catShort (&lt;90 min)          0.729   2.33e-58
+## 4 runtime:runtime_catShort (&lt;90 min) -0.00944 5.61e-67</code></pre>
+<pre class="r"><code>movie_df |&gt;
+  ggplot(aes(x = runtime, y = average_rating, color = runtime_cat)) +
+  geom_point(alpha = 0.4) +
+  geom_smooth(method = &quot;lm&quot;, se = FALSE) +
+  labs(
+    title = &quot;Interaction Between Runtime and Runtime Category&quot;,
+    x = &quot;Runtime (minutes)&quot;,
+    y = &quot;Average Rating&quot;,
+    color = &quot;Runtime Category&quot;
+  )</code></pre>
+<pre><code>## `geom_smooth()` using formula = &#39;y ~ x&#39;</code></pre>
+<p><img src="regression_files/figure-html/unnamed-chunk-9-1.png" width="90%" />
+WRITE INTERPRETATION</p>
 </div>
 <div id="appearances-in-user-curated-lists-vs.-average-rating"
 class="section level2">
@@ -465,7 +522,7 @@ class="section level2">
   geom_point() +
   geom_smooth(method = &quot;lm&quot;, se = TRUE)</code></pre>
 <pre><code>## `geom_smooth()` using formula = &#39;y ~ x&#39;</code></pre>
-<p><img src="regression_files/figure-html/unnamed-chunk-7-1.png" width="90%" /></p>
+<p><img src="regression_files/figure-html/unnamed-chunk-10-1.png" width="90%" /></p>
 <pre class="r"><code>appearances_model = lm(average_rating ~ list_appearances, data = movie_df)
 
 appearances_model |&gt; 
@@ -484,7 +541,7 @@ appearances_model |&gt;
   geom_point() +
   geom_smooth(method = &quot;lm&quot;, se = TRUE)</code></pre>
 <pre><code>## `geom_smooth()` using formula = &#39;y ~ x&#39;</code></pre>
-<p><img src="regression_files/figure-html/unnamed-chunk-8-1.png" width="90%" /></p>
+<p><img src="regression_files/figure-html/unnamed-chunk-11-1.png" width="90%" /></p>
 <pre class="r"><code>watches_model = lm(average_rating ~ watches, data = movie_df)
 
 watches_model |&gt; 
@@ -508,7 +565,7 @@ watches_model |&gt;
 <pre><code>## `geom_smooth()` using formula = &#39;y ~ x&#39;</code></pre>
 <pre><code>## Warning: Removed 1295 rows containing non-finite outside the scale range
 ## (`stat_smooth()`).</code></pre>
-<p><img src="regression_files/figure-html/unnamed-chunk-9-1.png" width="90%" /></p>
+<p><img src="regression_files/figure-html/unnamed-chunk-12-1.png" width="90%" /></p>
 <pre class="r"><code>fans_model = lm(average_rating ~ fans, data = movie_df) 
 
 fans_model |&gt; 
