@@ -172,7 +172,7 @@ movie_df |>
   labs(
     x = "Appearances",
     y = "Average Rating",
-    title = "Linear Regression of Appearances on User-Curated Lists vs. Average Rating"
+    title = "Linear Relationship Betweem Appearances on User-Curated Lists and Average Rating"
   )
 
 appearances_model = lm(average_rating ~ list_appearances, data = movie_df)
@@ -197,7 +197,7 @@ movie_df |>
   labs(
     x = "Total Watches",
     y = "Average Rating",
-    title = "Linear Regression of Total Watches vs.Average Rating"
+    title = "Linear Relationship Between Total Watches and Average Rating"
   )
 
 watches_model = lm(average_rating ~ watches, data = movie_df)
@@ -223,7 +223,7 @@ movie_df |>
   labs(
     x = "Number of Fans (Log Scale)",
     y = "Average Rating",
-    title = "Linear Regression of Number of Fans (Log Scale) vs. Average Rating"
+    title = "Linear Relationship Between Number of Fans (Log Scale) and Average Rating"
   )
 
 fans_model = lm(average_rating ~ fans, data = movie_df) 
@@ -251,24 +251,31 @@ Similarly, our p-values are so large due to the size of our dataset (n = 8074). 
 
 ```{r}
 r2_table = tibble(
- r2_model = c("Appearances in User-Curated Lists", "Watches", "Fans"),
-r2 = c(summary(appearances_model)$r.squared,
+ r2_model = c("Runtime", "Appearances in User-Curated Lists", "Watches", "Fans", "Runtime (adjusted)"),
+r2 = c(summary(runtime_model)$r.squared,
+summary(appearances_model)$r.squared,
 summary(watches_model)$r.squared,
-summary(fans_model)$r.squared
-)
-)
+summary(fans_model)$r.squared,
+summary(runtime_adj_model)$r.squared
+))
 
 knitr::kable(r2_table, digits = 4)
 ```
+**Runtime**: This model explains about **3.2%**  of the variation in movie ratings. The runtime of a film is the weakest predictor for average meeting among the models.
+
 **Appearances**: This model explains about **15%**  of the variation in movie ratings, suggesting that more appearances in user-curated lists are predictive of a higher rating.
 
 **Watches**: This model explains about **8.3%** of the variation in movie ratings. While a weaker effect size, this suggests that total watches is modestly predictive of a higher rating.
 
-**Fans**: This model explains about **6.8%** of the variation in movie ratings. The number of fans of a film has the smallest effect on a movie rating.
+**Fans**: This model explains about **6.8%** of the variation in movie ratings. The number of fans of a film is a very weak predictor for average rating. 
 
-Out of these variables, appearances in user-curated lists are the most predictive of higher ratings. This may be explained by users being pushed films by an algorithm that is tailored to their past watch history, liked movies, and other collected data. Thus, viewers enjoying a film catered to their preferences are more likely to assign it a high rating.
+**Runtime** (adjusted): This model explains about **19.1%** of the variation in movie ratings. This is the highest among the models and shows that once adjusting for other variables, runtime becomes more meaningful
 
-## Cross-validation: Average Rating
+Out of these individual variables, appearances in user-curated lists are the most predictive of higher ratings. This may be explained by users being pushed films by an algorithm that is tailored to their past watch history, liked movies, and other collected data. Thus, viewers enjoying a film catered to their preferences are more likely to assign it a high rating.
+
+While the adjusted runtime model has the highest R-squared, only 19.1% of average rating variance can be explained. More characteristics seem to influence a movie's average rating.
+
+## Cross-Validation: Average Rating
 
 ```{r}
 cv2_df = 
@@ -278,13 +285,19 @@ cv2_df = cv2_df %>%
   mutate(
     appearances_mod = map(.x = train, ~lm(average_rating ~ list_appearances, data = .x)),
     watches_mod = map(.x = train, ~lm(average_rating ~ watches, data = .x)),
-    fans_mod = map(.x = train, ~lm(average_rating ~ fans, data = .x))
-    )|> 
+    fans_mod = map(.x = train, ~lm(average_rating ~ fans, data = .x)),
+    runtime_mod = map(.x = train, ~lm(average_rating ~ runtime, data = .x)),
+    runtime_adj_mod = map(.x = train, ~lm(
+  average_rating ~ runtime + watches + list_appearances + fans,
+  data = .x))
+    ) |> 
 
   mutate(
     rmse_appearances = map2_dbl(.x = appearances_mod, .y = test, ~rmse(model = .x, data = .y)), 
     rmse_watches = map2_dbl(.x = watches_mod, .y = test, ~rmse(model = .x, data = .y)), 
-    rmse_fans = map2_dbl(.x = fans_mod, .y = test, ~rmse(model = .x, data = .y))
+    rmse_fans = map2_dbl(.x = fans_mod, .y = test, ~rmse(model = .x, data = .y)),
+    rmse_runtime = map2_dbl(.x = runtime_mod, .y = test, ~rmse(model = .x, data = .y)),
+    rmse_runtime_adj = map2_dbl(.x = runtime_adj_mod, .y = test, ~rmse(model = .x, data = .y))
   )
 
 cv2_df |> 
@@ -306,7 +319,11 @@ cv2_df |>
   summarise(
     mean_appearances = mean(rmse_appearances),
     mean_watch = mean(rmse_watches),
-    mean_fans = mean(rmse_fans)
-  )
+    mean_fans = mean(rmse_fans),
+    mean_runtime = mean(rmse_runtime),
+    mean_runtime_adj = mean(rmse_runtime_adj)
+  ) |> 
+   knitr::kable()
 ```
 
+Based on the models above, the model with runtime adjusted for covariates is the best model to predict a movie's average rating due to having the lowest RMSE, followed by appearances. Runtime individually is the weakest predictor.
