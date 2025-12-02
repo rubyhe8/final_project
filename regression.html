@@ -425,38 +425,96 @@ class="section level2">
 <pre class="r"><code>movie_df |&gt; 
   ggplot(aes(list_appearances, average_rating)) +
   geom_point() +
-  geom_smooth(method = &quot;lm&quot;, se = TRUE)</code></pre>
+  geom_smooth(method = &quot;lm&quot;, se = TRUE) +
+  labs(
+    x = &quot;Appearances&quot;,
+    y = &quot;Average Rating&quot;,
+    title = &quot;Linear Regression of Appearances on User-Curated Lists vs. Average Rating&quot;
+  )</code></pre>
 <pre><code>## `geom_smooth()` using formula = &#39;y ~ x&#39;</code></pre>
 <p><img src="regression_files/figure-html/unnamed-chunk-7-1.png" width="90%" /></p>
 <pre class="r"><code>appearances_model = lm(average_rating ~ list_appearances, data = movie_df)
 
 appearances_model |&gt; 
   broom::tidy() |&gt; 
-  select(term, estimate, p.value)</code></pre>
-<pre><code>## # A tibble: 2 × 3
-##   term               estimate   p.value
-##   &lt;chr&gt;                 &lt;dbl&gt;     &lt;dbl&gt;
-## 1 (Intercept)      3.11       0        
-## 2 list_appearances 0.00000339 3.44e-288</code></pre>
+  select(term, estimate, p.value) |&gt; 
+  mutate(p.value = formatC(p.value, format = &quot;e&quot;, digits = 3)) |&gt; 
+  knitr::kable()</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">term</th>
+<th align="right">estimate</th>
+<th align="left">p.value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">(Intercept)</td>
+<td align="right">3.1126124</td>
+<td align="left">0.000e+00</td>
+</tr>
+<tr class="even">
+<td align="left">list_appearances</td>
+<td align="right">0.0000034</td>
+<td align="left">3.442e-288</td>
+</tr>
+</tbody>
+</table>
+<p>The coefficient for <code>list_appearances</code> is 3.39-e06, which
+represents the estimated increase in rating for each unit increase in
+appearances in user-curated lists.</p>
+<p>The model’s p-value is 3.44e-288, which indicates that the number of
+times the movie appears in user-curated lists is extremely statistically
+significant in predicting its average rating.</p>
 </div>
 <div id="total-watches-vs.-average-rating" class="section level2">
 <h2>Total Watches vs. Average Rating</h2>
 <pre class="r"><code>movie_df |&gt; 
   ggplot(aes(watches, average_rating)) +
   geom_point() +
-  geom_smooth(method = &quot;lm&quot;, se = TRUE)</code></pre>
+  geom_smooth(method = &quot;lm&quot;, se = TRUE) +
+  labs(
+    x = &quot;Total Watches&quot;,
+    y = &quot;Average Rating&quot;,
+    title = &quot;Linear Regression of Total Watches vs.Average Rating&quot;
+  )</code></pre>
 <pre><code>## `geom_smooth()` using formula = &#39;y ~ x&#39;</code></pre>
 <p><img src="regression_files/figure-html/unnamed-chunk-8-1.png" width="90%" /></p>
 <pre class="r"><code>watches_model = lm(average_rating ~ watches, data = movie_df)
 
 watches_model |&gt; 
   broom::tidy() |&gt; 
-  select(term, estimate, p.value)</code></pre>
-<pre><code>## # A tibble: 2 × 3
-##   term           estimate   p.value
-##   &lt;chr&gt;             &lt;dbl&gt;     &lt;dbl&gt;
-## 1 (Intercept) 3.15        0        
-## 2 watches     0.000000304 7.41e-154</code></pre>
+  select(term, estimate, p.value) |&gt;
+  mutate(p.value = formatC(p.value, format = &quot;e&quot;, digits = 3)) |&gt; 
+  knitr::kable()</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">term</th>
+<th align="right">estimate</th>
+<th align="left">p.value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">(Intercept)</td>
+<td align="right">3.1511393</td>
+<td align="left">0.000e+00</td>
+</tr>
+<tr class="even">
+<td align="left">watches</td>
+<td align="right">0.0000003</td>
+<td align="left">7.415e-154</td>
+</tr>
+</tbody>
+</table>
+<p>The coefficient for <code>watches</code> is 3.04-e07, which
+represents the estimated increase in rating for each unit increase in
+the total number of times the movie have has watched by users.</p>
+<p>The model’s p-value is 7.41e-154, which indicates that the number of
+times the movie has been watched is extremely statistically significant
+in predicting its average rating.</p>
 </div>
 <div id="fans-vs.-average-rating" class="section level2">
 <h2>Fans vs. Average Rating</h2>
@@ -464,7 +522,12 @@ watches_model |&gt;
   ggplot(aes(fans, average_rating)) +
   geom_point() +
   geom_smooth(method = &quot;lm&quot;, se = TRUE) +
-  scale_x_log10()</code></pre>
+  scale_x_log10() +
+  labs(
+    x = &quot;Number of Fans (Log Scale)&quot;,
+    y = &quot;Average Rating&quot;,
+    title = &quot;Linear Regression of Number of Fans (Log Scale) vs. Average Rating&quot;
+  )</code></pre>
 <pre><code>## Warning in scale_x_log10(): log-10 transformation introduced infinite values.
 ## log-10 transformation introduced infinite values.</code></pre>
 <pre><code>## `geom_smooth()` using formula = &#39;y ~ x&#39;</code></pre>
@@ -473,14 +536,162 @@ watches_model |&gt;
 <p><img src="regression_files/figure-html/unnamed-chunk-9-1.png" width="90%" /></p>
 <pre class="r"><code>fans_model = lm(average_rating ~ fans, data = movie_df) 
 
-fans_model |&gt; 
+summary(fans_model)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = average_rating ~ fans, data = movie_df)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -3.2655 -0.3009  0.0733  0.3351  1.5149 
+## 
+## Coefficients:
+##              Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept) 3.187e+00  5.716e-03  557.46   &lt;2e-16 ***
+## fans        1.377e-05  5.659e-07   24.33   &lt;2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 0.5057 on 8072 degrees of freedom
+## Multiple R-squared:  0.06834,    Adjusted R-squared:  0.06822 
+## F-statistic: 592.1 on 1 and 8072 DF,  p-value: &lt; 2.2e-16</code></pre>
+<pre class="r"><code>fans_model |&gt; 
   broom::tidy() |&gt; 
-  select(term, estimate, p.value)</code></pre>
-<pre><code>## # A tibble: 2 × 3
-##   term         estimate   p.value
-##   &lt;chr&gt;           &lt;dbl&gt;     &lt;dbl&gt;
-## 1 (Intercept) 3.19      0        
-## 2 fans        0.0000138 2.88e-126</code></pre>
+  select(term, estimate, p.value) |&gt; 
+  mutate(p.value = formatC(p.value, format = &quot;e&quot;, digits = 3)) |&gt; 
+  knitr::kable()</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">term</th>
+<th align="right">estimate</th>
+<th align="left">p.value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">(Intercept)</td>
+<td align="right">3.1865530</td>
+<td align="left">0.000e+00</td>
+</tr>
+<tr class="even">
+<td align="left">fans</td>
+<td align="right">0.0000138</td>
+<td align="left">2.876e-126</td>
+</tr>
+</tbody>
+</table>
+<p>Due to <code>fans</code> being extremely skewed and having a wide
+value range, we used log scale to reduce extreme outliers and depict any
+linear relationships.</p>
+<p>The coefficient for <code>fans</code> is 1.38-e05, which represents
+the estimated increase in rating of the movie for each unit increase in
+the number of users who have marked themselves as a fan of the film.</p>
+<p>The model’s p-value is 2.88e-126, which indicates that the number of
+fans is is extremely statistically significant in predicting its average
+rating.</p>
+<div id="whats-with-the-extreme-numbers" class="section level3">
+<h3>What’s with the extreme numbers?</h3>
+<p>You might be wondering why both the coefficients and p-values are so
+small. First, consider the nature of our predictors. The number of
+appearances in user-curated lists, watches, and fans can easily reach
+the hundreds of thousands. For example, 100,000 more appearances
+predicts an increase of 0.339 in a film’s ratings.</p>
+<p>Similarly, our p-values are so large due to the size of our dataset
+(n = 8074). Thus, even very small effect sizes can lead to statistically
+significant p-values. To investigate the actual effect sizes, let’s look
+at the R-squared values of each model:</p>
+<pre class="r"><code>r2_table = tibble(
+ r2_model = c(&quot;Appearances in User-Curated Lists&quot;, &quot;Watches&quot;, &quot;Fans&quot;),
+r2 = c(summary(appearances_model)$r.squared,
+summary(watches_model)$r.squared,
+summary(fans_model)$r.squared
+)
+)
+
+knitr::kable(r2_table, digits = 4)</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">r2_model</th>
+<th align="right">r2</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Appearances in User-Curated Lists</td>
+<td align="right">0.1505</td>
+</tr>
+<tr class="even">
+<td align="left">Watches</td>
+<td align="right">0.0829</td>
+</tr>
+<tr class="odd">
+<td align="left">Fans</td>
+<td align="right">0.0683</td>
+</tr>
+</tbody>
+</table>
+<p>Appearances: This model explains about 15% of the variation in movie
+ratings, suggesting that more appearances in user-curated lists are
+predictive of a higher rating.</p>
+<p>Watches: This model explains about 8.3% of the variation in movie
+ratings. While a weaker effect size, this suggests that total watches is
+modestly predictive of a higher rating.</p>
+<p>Fans: This model explains about 6.8% of the variation in movie
+ratings. The number of fans of a film has the smallest effect on a movie
+rating.</p>
+<p>Out of these variables, appearances in user-curated lists are the
+most predictive of higher ratings. This may be explained by users being
+pushed films by an algorithm that is tailored to their past watch
+history, liked movies, and other collected data. Thus, viewers enjoying
+a film catered to their preferences are likely to assign it a high
+rating.</p>
+</div>
+</div>
+<div id="cross-validation-average-rating" class="section level2">
+<h2>Cross-validation: Average Rating</h2>
+<pre class="r"><code>cv2_df = 
+  crossv_mc(movie_df, 100)
+
+cv2_df = cv2_df %&gt;% 
+  mutate(
+    appearances_mod = map(.x = train, ~lm(average_rating ~ list_appearances, data = .x)),
+    watches_mod = map(.x = train, ~lm(average_rating ~ watches, data = .x)),
+    fans_mod = map(.x = train, ~lm(average_rating ~ fans, data = .x))
+    )|&gt; 
+
+  mutate(
+    rmse_appearances = map2_dbl(.x = appearances_mod, .y = test, ~rmse(model = .x, data = .y)), 
+    rmse_watches = map2_dbl(.x = watches_mod, .y = test, ~rmse(model = .x, data = .y)), 
+    rmse_fans = map2_dbl(.x = fans_mod, .y = test, ~rmse(model = .x, data = .y))
+  )
+
+cv2_df |&gt; 
+  select(starts_with(&quot;rmse&quot;)) |&gt; 
+  pivot_longer(
+    everything(),
+    names_to = &quot;model&quot;, 
+    values_to = &quot;rmse&quot;,
+    names_prefix = &quot;rmse_&quot;) |&gt; 
+  mutate(model = fct_inorder(model)) |&gt; 
+  ggplot(aes(x = model, y = rmse)) + geom_violin() +
+  labs(
+    x = &quot;Model&quot;,
+    y = &quot;RMSE&quot;,
+    title = &quot;Root Mean Squared Errors Distributions for Average Rating&quot;
+  )</code></pre>
+<p><img src="regression_files/figure-html/unnamed-chunk-11-1.png" width="90%" /></p>
+<pre class="r"><code>cv2_df |&gt; 
+  summarise(
+    mean_appearances = mean(rmse_appearances),
+    mean_watch = mean(rmse_watches),
+    mean_fans = mean(rmse_fans)
+  )</code></pre>
+<pre><code>## # A tibble: 1 × 3
+##   mean_appearances mean_watch mean_fans
+##              &lt;dbl&gt;      &lt;dbl&gt;     &lt;dbl&gt;
+## 1            0.484      0.503     0.508</code></pre>
 </div>
 </div>
 
