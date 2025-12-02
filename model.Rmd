@@ -1,0 +1,173 @@
+---
+title: "Model Building"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+This will include all code for building our model 
+
+
+```{r message = FALSE}
+library(tidyverse)
+library(mgcv)
+library(modelr)
+library(glmnet)
+
+
+knitr::opts_chunk$set(
+  fig.width = 6,
+  fig.asp = .6,
+  out.width = "90%"
+)
+
+theme_set(theme_minimal() + theme(legend.position = "bottom"))
+
+options(
+  ggplot2.continuous.colour = "viridis",
+  ggplot2.continuous.fill = "viridis"
+)
+
+scale_colour_discrete = scale_colour_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
+
+set.seed(1)
+```
+
+import in movie_df
+```{r}
+model_movie_df = read.csv("data/letterbox_movie_classification_dataset.csv") |>
+  janitor::clean_names() |>
+  filter(original_language == "English") |>
+  select(average_rating, runtime, watches, list_appearances, likes, fans, lowest, medium, highest, total_ratings)
+```
+
+
+fit a `lasso` model using `glmnet`
+```{r}
+x = model.matrix(average_rating ~ ., model_movie_df) [,-1]
+y = model_movie_df |> pull(average_rating)
+```
+
+`lambda`
+```{r}
+lambda = 10^(seq(-2, 2.75, 0.1))
+
+lasso_fit = 
+  glmnet(x, y, lambda = lambda)
+
+lasso_cv = 
+  cv.glmnet(x, y, lambda = lambda)
+
+lambda_opt = lasso_cv[["lambda.min"]]
+
+
+lasso_fit_opt = glmnet(x, y, lambda = lambda_opt) 
+
+lasso_fit_opt |> 
+  broom::tidy()
+  
+```
+
+Lasso model chooses the following predictors 
+
+* runtime 
+* list appearances 
+* fans 
+* lowest
+* highest 
+
+Using outside knowledge, we would like to include total number of watches and exclude lowest and highest (number of lowest ratings and number of highest ratings)
+
+linear model
+```{r}
+linear_model = lm(average_rating ~ runtime + list_appearances + watches + fans, data = model_movie_df)
+
+
+model_movie_df |> 
+  add_predictions(linear_model) |> 
+  add_residuals(linear_model) |> 
+  ggplot(aes(x = pred, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0) +
+  geom_smooth(method = "loess", se = FALSE)
+
+linear_model |> broom::glance()
+```
+
+
+gam model
+```{r}
+gam_model = gam(average_rating ~ s(runtime) + s(list_appearances) + s(watches) + s(fans), data = model_movie_df)
+
+model_movie_df |> 
+  add_predictions(gam_model) |> 
+  add_residuals(gam_model) |> 
+  ggplot(aes(x = pred, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0) +
+  geom_smooth(method = "loess", se = FALSE)
+
+gam_model |> 
+  broom::glance()
+```
+
+build training and testing tibbles
+```{r}
+cv_df = 
+  crossv_mc(model_movie_df, 100) 
+
+cv_df =
+  cv_df |> 
+  mutate(
+    train = map(train, as_tibble),
+    test = map(test, as_tibble))
+
+
+cv_df = 
+  cv_df |> 
+  mutate(
+    linear_mod  = map(train, \(df) lm(average_rating ~ runtime + list_appearances + watches + fans, data = df)),
+    smooth_mod  = map(train, \(df) gam(average_rating ~ s(runtime) + s(list_appearances) + s(watches) + s(fans), data = df))
+    ) |> 
+  mutate(
+    rmse_linear = map2_dbl(linear_mod, test, \(mod, df) rmse(model = mod, data = df)),
+    rmse_smooth = map2_dbl(smooth_mod, test, \(mod, df) rmse(model = mod, data = df)))
+
+
+cv_df |> 
+  select(starts_with("rmse")) |> 
+  pivot_longer(
+    everything(),
+    names_to = "model", 
+    values_to = "rmse",
+    names_prefix = "rmse_") |> 
+  mutate(model = fct_inorder(model)) |> 
+  ggplot(aes(x = model, y = rmse)) + geom_violin()
+```
+
+we want to use a smooth model > a linear model
+
+* smooth model has lower rmse
+* also seen in the plot of resid vs. pred - the linear model is not evenly distributed across resid = 0
+
+
+The optimal model that we think predicts `average_rating` is a generalized additive model containing the following predictors:
+
+* runtime 
+* list appearances 
+* watches
+* fans
+
+```{r}
+summary(gam_model)
+```
+
+significant p-value suggests that the non-linear relationship between the predictor and the response is statistically significant
+
+if we want to use a linear model 
+```{r}
+summary(linear_model)
+```
+

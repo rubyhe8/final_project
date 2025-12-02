@@ -11,7 +11,7 @@
 
 
 
-<title>Final Project (title tbd)</title>
+<title>Regression Analysis</title>
 
 <script src="site_libs/header-attrs-2.29/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
@@ -350,13 +350,176 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">Final Project (title tbd)</h1>
+<h1 class="title toc-ignore">Regression Analysis</h1>
 
 </div>
 
 
-<div id="this-is-our-indexhomepage" class="section level3">
-<h3>This is our index/homepage</h3>
+<pre class="r"><code>library(tidyverse)
+library(mgcv)
+library(modelr)
+library(glmnet)
+library(plotly)
+
+knitr::opts_chunk$set(
+  fig.width = 6,
+  fig.asp = .6,
+  out.width = &quot;90%&quot;
+)
+
+theme_set(theme_minimal() + theme(legend.position = &quot;bottom&quot;))
+
+options(
+  ggplot2.continuous.colour = &quot;viridis&quot;,
+  ggplot2.continuous.fill = &quot;viridis&quot;
+)
+
+scale_colour_discrete = scale_colour_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
+
+set.seed(1)</code></pre>
+<p>Import data and organize genre</p>
+<pre class="r"><code>movie_df = read.csv(&quot;data/letterbox_movie_classification_dataset.csv&quot;) |&gt;
+  janitor::clean_names() |&gt;
+  filter(original_language == &quot;English&quot;) |&gt;
+  select(film_title, director, average_rating, genres, runtime, original_language, description, studios, watches, list_appearances, likes, fans, lowest, medium, highest, total_ratings)</code></pre>
+<pre class="r"><code>genre_df = movie_df |&gt;
+  mutate(genres = str_remove_all(genres, &quot;\\[|\\]|&#39;&quot;)) |&gt;
+  separate_rows(genres, sep = &quot;,\\s*&quot;)</code></pre>
+<pre class="r"><code>genre_wide = genre_df |&gt; 
+  mutate(
+    studios = as.character(studios),
+    description = as.character(description),
+    genres = as.character(genres)
+  ) |&gt; 
+  mutate(value = 1) |&gt; 
+  group_by(
+    film_title, director, average_rating, runtime, original_language,
+    description, studios, watches, list_appearances, likes, fans,
+    lowest, medium, highest, total_ratings, genres
+  ) |&gt; 
+  summarise(value = max(value), .groups = &quot;drop&quot;) |&gt;
+  pivot_wider(
+    id_cols = c(
+      film_title, director, average_rating, runtime, original_language,
+      description, studios, watches, list_appearances, likes, fans,
+      lowest, medium, highest, total_ratings
+    ),
+    names_from = genres,
+    values_from = value,
+    values_fill = 0
+  ) |&gt; 
+  janitor::clean_names()</code></pre>
+<div id="linear-models" class="section level1">
+<h1>Linear Models</h1>
+<div id="runtime-vs.-average-rating" class="section level2">
+<h2>Runtime vs. Average Rating</h2>
+<pre class="r"><code># Scatterplot 
+movie_df |&gt; 
+  ggplot(aes(runtime, average_rating)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(method = &quot;lm&quot;, se = TRUE) +
+  labs(
+    title = &quot;Relationship Between Runtime and Average Rating&quot;,
+    x = &quot;Runtime (minutes)&quot;,
+    y = &quot;Average Rating&quot;
+  )</code></pre>
+<pre><code>## `geom_smooth()` using formula = &#39;y ~ x&#39;</code></pre>
+<p><img src="regression_files/figure-html/unnamed-chunk-5-1.png" width="90%" /></p>
+<pre class="r"><code>runtime_model = lm(average_rating ~ runtime, data = movie_df)
+
+#Hypothesis Test
+runtime_model |&gt; 
+  broom::tidy() |&gt; 
+  select(term, estimate, p.value)</code></pre>
+<pre><code>## # A tibble: 2 × 3
+##   term        estimate  p.value
+##   &lt;chr&gt;          &lt;dbl&gt;    &lt;dbl&gt;
+## 1 (Intercept)  2.95    0       
+## 2 runtime      0.00258 1.04e-59</code></pre>
+<p>WRITE INTREPRATION ## Runtime vs. Average Rating, adjusted for
+covariates</p>
+<pre class="r"><code>runtime_adj_model = lm(
+  average_rating ~ runtime + watches + list_appearances + fans,
+  data = movie_df
+)
+
+runtime_adj_model |&gt; 
+  broom::tidy() |&gt; 
+  select(term, estimate, p.value)</code></pre>
+<pre><code>## # A tibble: 5 × 3
+##   term                 estimate   p.value
+##   &lt;chr&gt;                   &lt;dbl&gt;     &lt;dbl&gt;
+## 1 (Intercept)       2.94        0        
+## 2 runtime           0.00158     7.89e- 27
+## 3 watches          -0.000000431 4.77e- 60
+## 4 list_appearances  0.00000676  3.78e-168
+## 5 fans             -0.00000229  3.05e-  3</code></pre>
+<p>WRITE INTERPRETATION</p>
+</div>
+<div id="appearances-in-user-curated-lists-vs.-average-rating"
+class="section level2">
+<h2>Appearances in User-Curated Lists vs. Average Rating</h2>
+<pre class="r"><code>movie_df |&gt; 
+  ggplot(aes(list_appearances, average_rating)) +
+  geom_point() +
+  geom_smooth(method = &quot;lm&quot;, se = TRUE)</code></pre>
+<pre><code>## `geom_smooth()` using formula = &#39;y ~ x&#39;</code></pre>
+<p><img src="regression_files/figure-html/unnamed-chunk-7-1.png" width="90%" /></p>
+<pre class="r"><code>appearances_model = lm(average_rating ~ list_appearances, data = movie_df)
+
+appearances_model |&gt; 
+  broom::tidy() |&gt; 
+  select(term, estimate, p.value)</code></pre>
+<pre><code>## # A tibble: 2 × 3
+##   term               estimate   p.value
+##   &lt;chr&gt;                 &lt;dbl&gt;     &lt;dbl&gt;
+## 1 (Intercept)      3.11       0        
+## 2 list_appearances 0.00000339 3.44e-288</code></pre>
+</div>
+<div id="total-watches-vs.-average-rating" class="section level2">
+<h2>Total Watches vs. Average Rating</h2>
+<pre class="r"><code>movie_df |&gt; 
+  ggplot(aes(watches, average_rating)) +
+  geom_point() +
+  geom_smooth(method = &quot;lm&quot;, se = TRUE)</code></pre>
+<pre><code>## `geom_smooth()` using formula = &#39;y ~ x&#39;</code></pre>
+<p><img src="regression_files/figure-html/unnamed-chunk-8-1.png" width="90%" /></p>
+<pre class="r"><code>watches_model = lm(average_rating ~ watches, data = movie_df)
+
+watches_model |&gt; 
+  broom::tidy() |&gt; 
+  select(term, estimate, p.value)</code></pre>
+<pre><code>## # A tibble: 2 × 3
+##   term           estimate   p.value
+##   &lt;chr&gt;             &lt;dbl&gt;     &lt;dbl&gt;
+## 1 (Intercept) 3.15        0        
+## 2 watches     0.000000304 7.41e-154</code></pre>
+</div>
+<div id="fans-vs.-average-rating" class="section level2">
+<h2>Fans vs. Average Rating</h2>
+<pre class="r"><code>movie_df |&gt; 
+  ggplot(aes(fans, average_rating)) +
+  geom_point() +
+  geom_smooth(method = &quot;lm&quot;, se = TRUE) +
+  scale_x_log10()</code></pre>
+<pre><code>## Warning in scale_x_log10(): log-10 transformation introduced infinite values.
+## log-10 transformation introduced infinite values.</code></pre>
+<pre><code>## `geom_smooth()` using formula = &#39;y ~ x&#39;</code></pre>
+<pre><code>## Warning: Removed 1295 rows containing non-finite outside the scale range
+## (`stat_smooth()`).</code></pre>
+<p><img src="regression_files/figure-html/unnamed-chunk-9-1.png" width="90%" /></p>
+<pre class="r"><code>fans_model = lm(average_rating ~ fans, data = movie_df) 
+
+fans_model |&gt; 
+  broom::tidy() |&gt; 
+  select(term, estimate, p.value)</code></pre>
+<pre><code>## # A tibble: 2 × 3
+##   term         estimate   p.value
+##   &lt;chr&gt;           &lt;dbl&gt;     &lt;dbl&gt;
+## 1 (Intercept) 3.19      0        
+## 2 fans        0.0000138 2.88e-126</code></pre>
+</div>
 </div>
 
 
