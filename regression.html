@@ -33,6 +33,7 @@
 <link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
 <script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
 <link href="site_libs/font-awesome-6.5.2/css/all.min.css" rel="stylesheet" />
@@ -221,6 +222,9 @@ $(document).ready(function () {
 </style>
 
 <!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
 
 
 
@@ -348,6 +352,14 @@ div.tocify {
 
 <div id="header">
 
+<div class="btn-group pull-right float-right">
+<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu dropdown-menu-right" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
 
 
 <h1 class="title toc-ignore">Regression Analysis</h1>
@@ -461,12 +473,13 @@ appearances_model |&gt;
 </tr>
 </tbody>
 </table>
-<p>The coefficient for <code>list_appearances</code> is 3.39-e06, which
-represents the estimated increase in rating for each unit increase in
-appearances in user-curated lists.</p>
-<p>The model’s p-value is 3.44e-288, which indicates that the number of
-times the movie appears in user-curated lists is extremely statistically
-significant in predicting its average rating.</p>
+<p>The coefficient for <code>list_appearances</code> is
+<strong>3.39-e06</strong>, which represents the estimated increase in
+rating for each unit increase in appearances in user-curated lists.</p>
+<p>The model’s p-value is <strong>3.44e-288</strong>, which indicates
+that the number of times the movie appears in user-curated lists is
+extremely statistically significant in predicting its average
+rating.</p>
 </div>
 <div id="total-watches-vs.-average-rating" class="section level2">
 <h2>Total Watches vs. Average Rating</h2>
@@ -509,12 +522,13 @@ watches_model |&gt;
 </tr>
 </tbody>
 </table>
-<p>The coefficient for <code>watches</code> is 3.04-e07, which
-represents the estimated increase in rating for each unit increase in
-the total number of times the movie have has watched by users.</p>
-<p>The model’s p-value is 7.41e-154, which indicates that the number of
-times the movie has been watched is extremely statistically significant
-in predicting its average rating.</p>
+<p>The coefficient for <code>watches</code> is
+<strong>3.04-e07</strong>, which represents the estimated increase in
+rating for each unit increase in the total number of times the movie
+have has watched by users.</p>
+<p>The model’s p-value is <strong>7.41e-154</strong>, which indicates
+that the number of times the movie has been watched is extremely
+statistically significant in predicting its average rating.</p>
 </div>
 <div id="fans-vs.-average-rating" class="section level2">
 <h2>Fans vs. Average Rating</h2>
@@ -584,12 +598,13 @@ summary(fans_model)</code></pre>
 <p>Due to <code>fans</code> being extremely skewed and having a wide
 value range, we used log scale to reduce extreme outliers and depict any
 linear relationships.</p>
-<p>The coefficient for <code>fans</code> is 1.38-e05, which represents
-the estimated increase in rating of the movie for each unit increase in
-the number of users who have marked themselves as a fan of the film.</p>
-<p>The model’s p-value is 2.88e-126, which indicates that the number of
-fans is is extremely statistically significant in predicting its average
-rating.</p>
+<p>The coefficient for <code>fans</code> is <strong>1.38-e05</strong>,
+which represents the estimated increase in rating of the movie for each
+unit increase in the number of users who have marked themselves as a fan
+of the film.</p>
+<p>The model’s p-value is <strong>2.88e-126</strong>, which indicates
+that the number of fans is is extremely statistically significant in
+predicting its average rating.</p>
 <div id="whats-with-the-extreme-numbers" class="section level3">
 <h3>What’s with the extreme numbers?</h3>
 <p>You might be wondering why both the coefficients and p-values are so
@@ -632,20 +647,22 @@ knitr::kable(r2_table, digits = 4)</code></pre>
 </tr>
 </tbody>
 </table>
-<p>Appearances: This model explains about 15% of the variation in movie
-ratings, suggesting that more appearances in user-curated lists are
-predictive of a higher rating.</p>
-<p>Watches: This model explains about 8.3% of the variation in movie
-ratings. While a weaker effect size, this suggests that total watches is
-modestly predictive of a higher rating.</p>
-<p>Fans: This model explains about 6.8% of the variation in movie
-ratings. The number of fans of a film has the smallest effect on a movie
+<p><strong>Appearances</strong>: This model explains about
+<strong>15%</strong> of the variation in movie ratings, suggesting that
+more appearances in user-curated lists are predictive of a higher
 rating.</p>
+<p><strong>Watches</strong>: This model explains about
+<strong>8.3%</strong> of the variation in movie ratings. While a weaker
+effect size, this suggests that total watches is modestly predictive of
+a higher rating.</p>
+<p><strong>Fans</strong>: This model explains about
+<strong>6.8%</strong> of the variation in movie ratings. The number of
+fans of a film has the smallest effect on a movie rating.</p>
 <p>Out of these variables, appearances in user-curated lists are the
 most predictive of higher ratings. This may be explained by users being
 pushed films by an algorithm that is tailored to their past watch
 history, liked movies, and other collected data. Thus, viewers enjoying
-a film catered to their preferences are likely to assign it a high
+a film catered to their preferences are more likely to assign it a high
 rating.</p>
 </div>
 </div>
@@ -730,6 +747,11 @@ $(document).ready(function () {
 </script>
 
 <!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
 
 <script>
 $(document).ready(function ()  {

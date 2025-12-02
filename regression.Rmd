@@ -4,6 +4,7 @@ output:
   html_document:
     toc: true
     toc_float: true
+    code_folding: hide
 ---
 
 ```{r message = FALSE}
@@ -106,9 +107,9 @@ appearances_model |>
   knitr::kable()
 ```
 
-The coefficient for `list_appearances` is 3.39-e06, which represents the estimated increase in rating for each unit increase in appearances in user-curated lists.
+The coefficient for `list_appearances` is **3.39-e06**, which represents the estimated increase in rating for each unit increase in appearances in user-curated lists.
 
-The model's p-value is 3.44e-288, which indicates that the number of times the movie appears in user-curated lists is extremely statistically significant in predicting its average rating.
+The model's p-value is **3.44e-288**, which indicates that the number of times the movie appears in user-curated lists is extremely statistically significant in predicting its average rating.
 
 ## Total Watches vs. Average Rating
 ```{r}
@@ -131,9 +132,9 @@ watches_model |>
   knitr::kable()
 ```
 
-The coefficient for `watches` is 3.04-e07, which represents the estimated increase in rating for each unit increase in the total number of times the movie have has watched by users.
+The coefficient for `watches` is **3.04-e07**, which represents the estimated increase in rating for each unit increase in the total number of times the movie have has watched by users.
 
-The model's p-value is 7.41e-154, which indicates that the number of times the movie has been watched is extremely statistically significant in predicting its average rating.
+The model's p-value is **7.41e-154**, which indicates that the number of times the movie has been watched is extremely statistically significant in predicting its average rating.
 
 ## Fans vs. Average Rating
 ```{r}
@@ -161,9 +162,9 @@ fans_model |>
 
 Due to `fans` being extremely skewed and having a wide value range, we used log scale to reduce extreme outliers and depict any linear relationships.
 
-The coefficient for `fans` is 1.38-e05, which represents the estimated increase in rating of the movie for each unit increase in the number of users who have marked themselves as a fan of the film.
+The coefficient for `fans` is **1.38-e05**, which represents the estimated increase in rating of the movie for each unit increase in the number of users who have marked themselves as a fan of the film.
 
-The model's p-value is 2.88e-126, which indicates that the number of fans is is extremely statistically significant in predicting its average rating.
+The model's p-value is **2.88e-126**, which indicates that the number of fans is is extremely statistically significant in predicting its average rating.
 
 ### What's with the extreme numbers?
 
@@ -182,13 +183,13 @@ summary(fans_model)$r.squared
 
 knitr::kable(r2_table, digits = 4)
 ```
-Appearances: This model explains about 15%  of the variation in movie ratings, suggesting that more appearances in user-curated lists are predictive of a higher rating.
+**Appearances**: This model explains about **15%**  of the variation in movie ratings, suggesting that more appearances in user-curated lists are predictive of a higher rating.
 
-Watches: This model explains about 8.3% of the variation in movie ratings. While a weaker effect size, this suggests that total watches is modestly predictive of a higher rating.
+**Watches**: This model explains about **8.3%** of the variation in movie ratings. While a weaker effect size, this suggests that total watches is modestly predictive of a higher rating.
 
-Fans: This model explains about 6.8% of the variation in movie ratings. The number of fans of a film has the smallest effect on a movie rating.
+**Fans**: This model explains about **6.8%** of the variation in movie ratings. The number of fans of a film has the smallest effect on a movie rating.
 
-Out of these variables, appearances in user-curated lists are the most predictive of higher ratings. This may be explained by users being pushed films by an algorithm that is tailored to their past watch history, liked movies, and other collected data. Thus, viewers enjoying a film catered to their preferences are likely to assign it a high rating.
+Out of these variables, appearances in user-curated lists are the most predictive of higher ratings. This may be explained by users being pushed films by an algorithm that is tailored to their past watch history, liked movies, and other collected data. Thus, viewers enjoying a film catered to their preferences are more likely to assign it a high rating.
 
 ## Cross-validation: Average Rating
 
