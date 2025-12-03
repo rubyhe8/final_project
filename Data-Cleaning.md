@@ -128,8 +128,7 @@ ggplot(movie_df, aes(x = runtime)) +
         x = "Runtime (minutes)", y = "Count")
 ```
 
-    ## `stat_bin()` using `bins = 30`. Pick better value with
-    ## `binwidth`.
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
 ![](Data-Cleaning_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
 
@@ -144,8 +143,7 @@ ggplot(movie_df, aes(x=list_appearances, y = likes)) +
         x = "List Appearances", y = "Likes")
 ```
 
-    ## `geom_smooth()` using method = 'gam' and formula = 'y ~ s(x, bs
-    ## = "cs")'
+    ## `geom_smooth()` using method = 'gam' and formula = 'y ~ s(x, bs = "cs")'
 
 ![](Data-Cleaning_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
 
@@ -160,8 +158,7 @@ ggplot(movie_df, aes(x=runtime, y=average_rating)) +
         x = "Runtime (minutes)", y = "Average Rating")
 ```
 
-    ## `geom_smooth()` using method = 'gam' and formula = 'y ~ s(x, bs
-    ## = "cs")'
+    ## `geom_smooth()` using method = 'gam' and formula = 'y ~ s(x, bs = "cs")'
 
 ![](Data-Cleaning_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
 

@@ -391,11 +391,42 @@ div.tocify {
 <div id="model-building" class="section level3">
 <h3>Model Building</h3>
 </div>
-<div id="additional-analysis" class="section level3">
-<h3>Additional Analysis</h3>
+<div id="additional-analysis-linear-models" class="section level3">
+<h3>Additional Analysis: Linear Models</h3>
+<p>Across several regression analyses, our primary objective was to
+assess how individual movie characteristics relate to a film’s average
+rating on Letterboxd. We first examined Runtime as a predictor and found
+that longer runtime was statistically associated with higher ratings.
+However when looked at visually looked at there was a suggested a weak
+linear trend. Even when applying a log-transformation or dichotomizing
+runtime into short (&lt;90 minutes) and long (≥90 minutes) films,
+runtime remained a difficult variable to model on it’s own.This suggests
+that runtime on its own provides limited insight into what drives
+audience reception.</p>
+<p>Next, we explored alternative predictors that reflect audience
+engagement, appearances on user-curated lists, total watches, and number
+of fans. All three variables were highly statistically significant
+predictors of average rating, and were driven by the very large sample
+sizes. Effect sizes also were varied, with appearances in user-curated
+lists explaining the greatest proportion of variation in ratings (R² ≈
+0.15), followed by total watches (R² ≈ 0.083) and fans (R² ≈ 0.068).
+These findings indicate that movies that are more widely circulated and
+recommended within the platform tend to earn higher ratings—possibly due
+to personalized recommendation algorithms reinforcing user
+preferences.</p>
+<p>Finally, incorporating multiple predictors into an adjusted model
+resulted in improved model performance, with the adjusted runtime model
+explaining approximately 19% of the variance in average ratings, the
+strongest result among all models evaluated. Cross-validation further
+supported this conclusion, as the covariate-adjusted runtime model
+yielded the lowest RMSE, indicating the highest predictive accuracy.
+Altogether, while runtime alone is a weak predictor of perceived movie
+quality, audience engagement metrics, particularly curated list
+appearances, emerge as more powerful indicators of how viewers rate the
+movie.</p>
 </div>
-<div id="discussion" class="section level3">
-<h3>Discussion</h3>
+<div id="discussion" class="section level1">
+<h1>### Discussion</h1>
 </div>
 
 
