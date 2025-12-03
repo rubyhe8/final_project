@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Regression Analysis</title>
+
+<script src="site_libs/header-attrs-2.29/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.13.2/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-6.5.2/css/all.min.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet" />
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Home</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="model.html">Model Building</a>
+</li>
+<li>
+  <a href="regression.html">Regression Analysis</a>
+</li>
+<li>
+  <a href="report.html">Report</a>
+</li>
+<li>
+  <a href="mailto:&lt;you@youremail.com&gt;">
+    <span class="fa fa-envelope fa-lg"></span>
+     
+  </a>
+</li>
+<li>
+  <a href="http://github.com/&lt;YOUR_GH_NAME&gt;/">
+    <span class="fa fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+<div class="btn-group pull-right float-right">
+<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu dropdown-menu-right" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">Regression Analysis</h1>
+
+</div>
+
+
+<pre class="r"><code>library(tidyverse)
+library(mgcv)
+library(modelr)
+library(glmnet)
+library(plotly)
+
+knitr::opts_chunk$set(
+  fig.width = 6,
+  fig.asp = .6,
+  out.width = &quot;90%&quot;
+)
+
+theme_set(theme_minimal() + theme(legend.position = &quot;bottom&quot;))
+
+options(
+  ggplot2.continuous.colour = &quot;viridis&quot;,
+  ggplot2.continuous.fill = &quot;viridis&quot;
+)
+
+scale_colour_discrete = scale_colour_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
+
+set.seed(1)</code></pre>
+<p>Import data and organize genre</p>
+<pre class="r"><code>movie_df = read.csv(&quot;data/letterbox_movie_classification_dataset.csv&quot;) |&gt;
+  janitor::clean_names() |&gt;
+  filter(original_language == &quot;English&quot;) |&gt;
+  select(film_title, director, average_rating, genres, runtime, original_language, description, studios, watches, list_appearances, likes, fans, lowest, medium, highest, total_ratings)</code></pre>
+<pre class="r"><code>genre_df = movie_df |&gt;
+  mutate(genres = str_remove_all(genres, &quot;\\[|\\]|&#39;&quot;)) |&gt;
+  separate_rows(genres, sep = &quot;,\\s*&quot;)</code></pre>
+<pre class="r"><code>genre_wide = genre_df |&gt; 
+  mutate(
+    studios = as.character(studios),
+    description = as.character(description),
+    genres = as.character(genres)
+  ) |&gt; 
+  mutate(value = 1) |&gt; 
+  group_by(
+    film_title, director, average_rating, runtime, original_language,
+    description, studios, watches, list_appearances, likes, fans,
+    lowest, medium, highest, total_ratings, genres
+  ) |&gt; 
+  summarise(value = max(value), .groups = &quot;drop&quot;) |&gt;
+  pivot_wider(
+    id_cols = c(
+      film_title, director, average_rating, runtime, original_language,
+      description, studios, watches, list_appearances, likes, fans,
+      lowest, medium, highest, total_ratings
+    ),
+    names_from = genres,
+    values_from = value,
+    values_fill = 0
+  ) |&gt; 
+  janitor::clean_names()</code></pre>
+<div id="linear-models" class="section level1">
+<h1>Linear Models</h1>
+<div id="runtime-vs.-average-rating" class="section level2">
+<h2>Runtime vs. Average Rating</h2>
+<pre class="r"><code># Scatterplot 
+movie_df |&gt; 
+  ggplot(aes(runtime, average_rating)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(method = &quot;lm&quot;, se = TRUE) +
+  labs(
+    title = &quot;Linear Relationship Between Runtime and Average Rating&quot;,
+    x = &quot;Runtime (minutes)&quot;,
+    y = &quot;Average Rating&quot;
+  )</code></pre>
+<p><img src="regression_files/figure-html/unnamed-chunk-5-1.png" width="90%" /></p>
+<pre class="r"><code>runtime_model = lm(average_rating ~ runtime, data = movie_df)
+
+#Hypothesis Test
+runtime_model |&gt; 
+  broom::tidy() |&gt; 
+  select(term, estimate, p.value)</code></pre>
+<pre><code>## # A tibble: 2 × 3
+##   term        estimate  p.value
+##   &lt;chr&gt;          &lt;dbl&gt;    &lt;dbl&gt;
+## 1 (Intercept)  2.95    0       
+## 2 runtime      0.00258 1.04e-59</code></pre>
+</div>
+<div id="runtime-vs.-average-rating-adjusted-for-covariates"
+class="section level2">
+<h2>Runtime vs. Average Rating, adjusted for covariates</h2>
+<pre class="r"><code>runtime_adj_model = lm(
+  average_rating ~ runtime + watches + list_appearances + fans,
+  data = movie_df
+)
+
+runtime_adj_model |&gt; 
+  broom::tidy() |&gt; 
+  select(term, estimate, p.value)</code></pre>
+<pre><code>## # A tibble: 5 × 3
+##   term                 estimate   p.value
+##   &lt;chr&gt;                   &lt;dbl&gt;     &lt;dbl&gt;
+## 1 (Intercept)       2.94        0        
+## 2 runtime           0.00158     7.89e- 27
+## 3 watches          -0.000000431 4.77e- 60
+## 4 list_appearances  0.00000676  3.78e-168
+## 5 fans             -0.00000229  3.05e-  3</code></pre>
+<pre class="r"><code>## Log-Transformed Runtime vs Average Rating
+
+# Scatterplot with log(runtime)
+movie_df |&gt; 
+  ggplot(aes(x = log(runtime), y = average_rating)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(method = &quot;lm&quot;, se = TRUE) +
+  labs(
+    title = &quot;Relationship Between log(Runtime) and Average Rating&quot;,
+    x = &quot;log(Runtime)&quot;,
+    y = &quot;Average Rating&quot;
+  )</code></pre>
+<p><img src="regression_files/figure-html/unnamed-chunk-7-1.png" width="90%" /></p>
+<pre class="r"><code># Model with log-transformed runtime
+runtime_log_model = lm(average_rating ~ log(runtime), data = movie_df)
+
+runtime_log_model |&gt; 
+  broom::tidy() |&gt; 
+  select(term, estimate, p.value)</code></pre>
+<pre><code>## # A tibble: 2 × 3
+##   term         estimate       p.value
+##   &lt;chr&gt;           &lt;dbl&gt;         &lt;dbl&gt;
+## 1 (Intercept)    2.85   0            
+## 2 log(runtime)   0.0790 0.00000000937</code></pre>
+<p>Dictotomizing Runtime (above and below 90 mins)</p>
+<pre class="r"><code>movie_df = movie_df |&gt;
+  mutate(
+    runtime_cat = if_else(runtime &lt; 90, &quot;Short (&lt;90 min)&quot;, &quot;Long (≥90 min)&quot;)
+  )
+runtime_interaction_model = lm(
+  average_rating ~ runtime * runtime_cat,
+  data = movie_df
+)
+
+runtime_interaction_model |&gt; 
+  broom::tidy() |&gt; 
+  select(term, estimate, p.value)</code></pre>
+<pre><code>## # A tibble: 4 × 3
+##   term                               estimate  p.value
+##   &lt;chr&gt;                                 &lt;dbl&gt;    &lt;dbl&gt;
+## 1 (Intercept)                         2.83    0       
+## 2 runtime                             0.00363 3.88e-83
+## 3 runtime_catShort (&lt;90 min)          0.729   2.33e-58
+## 4 runtime:runtime_catShort (&lt;90 min) -0.00944 5.61e-67</code></pre>
+<pre class="r"><code>movie_df |&gt;
+  ggplot(aes(x = runtime, y = average_rating, color = runtime_cat)) +
+  geom_point(alpha = 0.4) +
+  geom_smooth(method = &quot;lm&quot;, se = FALSE) +
+  labs(
+    title = &quot;Interaction Between Runtime and Runtime Category&quot;,
+    x = &quot;Runtime (minutes)&quot;,
+    y = &quot;Average Rating&quot;,
+    color = &quot;Runtime Category&quot;
+  )</code></pre>
+<p><img src="regression_files/figure-html/unnamed-chunk-9-1.png" width="90%" />
+WRITE INTERPRETATION</p>
+</div>
+<div id="appearances-in-user-curated-lists-vs.-average-rating"
+class="section level2">
+<h2>Appearances in User-Curated Lists vs. Average Rating</h2>
+<pre class="r"><code>movie_df |&gt; 
+  ggplot(aes(list_appearances, average_rating)) +
+  geom_point() +
+  geom_smooth(method = &quot;lm&quot;, se = TRUE) +
+  labs(
+    x = &quot;Appearances&quot;,
+    y = &quot;Average Rating&quot;,
+    title = &quot;Linear Relationship Betweem Appearances on User-Curated Lists and Average Rating&quot;
+  )</code></pre>
+<p><img src="regression_files/figure-html/unnamed-chunk-10-1.png" width="90%" /></p>
+<pre class="r"><code>appearances_model = lm(average_rating ~ list_appearances, data = movie_df)
+
+appearances_model |&gt; 
+  broom::tidy() |&gt; 
+  select(term, estimate, p.value) |&gt; 
+  mutate(p.value = formatC(p.value, format = &quot;e&quot;, digits = 3)) |&gt; 
+  knitr::kable()</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">term</th>
+<th align="right">estimate</th>
+<th align="left">p.value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">(Intercept)</td>
+<td align="right">3.1126124</td>
+<td align="left">0.000e+00</td>
+</tr>
+<tr class="even">
+<td align="left">list_appearances</td>
+<td align="right">0.0000034</td>
+<td align="left">3.442e-288</td>
+</tr>
+</tbody>
+</table>
+<p>The coefficient for <code>list_appearances</code> is
+<strong>3.39-e06</strong>, which represents the estimated increase in
+rating for each unit increase in appearances in user-curated lists.</p>
+<p>The model’s p-value is <strong>3.44e-288</strong>, which indicates
+that the number of times the movie appears in user-curated lists is
+extremely statistically significant in predicting its average
+rating.</p>
+</div>
+<div id="total-watches-vs.-average-rating" class="section level2">
+<h2>Total Watches vs. Average Rating</h2>
+<pre class="r"><code>movie_df |&gt; 
+  ggplot(aes(watches, average_rating)) +
+  geom_point() +
+  geom_smooth(method = &quot;lm&quot;, se = TRUE) +
+  labs(
+    x = &quot;Total Watches&quot;,
+    y = &quot;Average Rating&quot;,
+    title = &quot;Linear Relationship Between Total Watches and Average Rating&quot;
+  )</code></pre>
+<p><img src="regression_files/figure-html/unnamed-chunk-11-1.png" width="90%" /></p>
+<pre class="r"><code>watches_model = lm(average_rating ~ watches, data = movie_df)
+
+watches_model |&gt; 
+  broom::tidy() |&gt; 
+  select(term, estimate, p.value) |&gt;
+  mutate(p.value = formatC(p.value, format = &quot;e&quot;, digits = 3)) |&gt; 
+  knitr::kable()</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">term</th>
+<th align="right">estimate</th>
+<th align="left">p.value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">(Intercept)</td>
+<td align="right">3.1511393</td>
+<td align="left">0.000e+00</td>
+</tr>
+<tr class="even">
+<td align="left">watches</td>
+<td align="right">0.0000003</td>
+<td align="left">7.415e-154</td>
+</tr>
+</tbody>
+</table>
+<p>The coefficient for <code>watches</code> is
+<strong>3.04-e07</strong>, which represents the estimated increase in
+rating for each unit increase in the total number of times the movie
+have has watched by users.</p>
+<p>The model’s p-value is <strong>7.41e-154</strong>, which indicates
+that the number of times the movie has been watched is extremely
+statistically significant in predicting its average rating.</p>
+</div>
+<div id="fans-vs.-average-rating" class="section level2">
+<h2>Fans vs. Average Rating</h2>
+<pre class="r"><code>movie_df |&gt; 
+  ggplot(aes(log(fans), average_rating)) +
+  geom_point() +
+  geom_smooth(method = &quot;lm&quot;, se = TRUE) +
+  labs(
+    x = &quot;log(Fans&quot;,
+    y = &quot;Average Rating&quot;,
+    title = &quot;Linear Relationship Between Number of log(fans) and Average Rating&quot;
+  )</code></pre>
+<p><img src="regression_files/figure-html/unnamed-chunk-12-1.png" width="90%" /></p>
+<pre class="r"><code>fans_model = lm(average_rating ~ fans, data = movie_df) 
+
+fans_model |&gt; 
+  broom::tidy() |&gt; 
+  select(term, estimate, p.value) |&gt; 
+  mutate(p.value = formatC(p.value, format = &quot;e&quot;, digits = 3)) |&gt; 
+  knitr::kable()</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">term</th>
+<th align="right">estimate</th>
+<th align="left">p.value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">(Intercept)</td>
+<td align="right">3.1865530</td>
+<td align="left">0.000e+00</td>
+</tr>
+<tr class="even">
+<td align="left">fans</td>
+<td align="right">0.0000138</td>
+<td align="left">2.876e-126</td>
+</tr>
+</tbody>
+</table>
+<p>Due to <code>fans</code> being extremely skewed and having a wide
+value range, we used log scale to reduce extreme outliers and depict any
+linear relationships.</p>
+<p>The coefficient for <code>fans</code> is <strong>1.38-e05</strong>,
+which represents the estimated increase in rating of the movie for each
+unit increase in the number of users who have marked themselves as a fan
+of the film.</p>
+<p>The model’s p-value is <strong>2.88e-126</strong>, which indicates
+that the number of fans is is extremely statistically significant in
+predicting its average rating.</p>
+<div id="whats-with-the-extreme-numbers" class="section level3">
+<h3>What’s with the extreme numbers?</h3>
+<p>You might be wondering why both the coefficients and p-values are so
+small. First, consider the nature of our predictors. The number of
+appearances in user-curated lists, watches, and fans can easily reach
+the hundreds of thousands. For example, 100,000 more appearances
+predicts an increase of 0.339 in a film’s ratings.</p>
+<p>Similarly, our p-values are so large due to the size of our dataset
+(n = 8074). Thus, even very small effect sizes can lead to statistically
+significant p-values. To investigate the actual effect sizes, let’s look
+at the R-squared values of each model:</p>
+<pre class="r"><code>r2_table = tibble(
+ r2_model = c(&quot;Runtime&quot;, &quot;Appearances in User-Curated Lists&quot;, &quot;Watches&quot;, &quot;Fans&quot;, &quot;Runtime (adjusted)&quot;),
+r2 = c(summary(runtime_model)$r.squared,
+summary(appearances_model)$r.squared,
+summary(watches_model)$r.squared,
+summary(fans_model)$r.squared,
+summary(runtime_adj_model)$r.squared
+))
+
+knitr::kable(r2_table, digits = 4)</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">r2_model</th>
+<th align="right">r2</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Runtime</td>
+<td align="right">0.0324</td>
+</tr>
+<tr class="even">
+<td align="left">Appearances in User-Curated Lists</td>
+<td align="right">0.1505</td>
+</tr>
+<tr class="odd">
+<td align="left">Watches</td>
+<td align="right">0.0829</td>
+</tr>
+<tr class="even">
+<td align="left">Fans</td>
+<td align="right">0.0683</td>
+</tr>
+<tr class="odd">
+<td align="left">Runtime (adjusted)</td>
+<td align="right">0.1906</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Runtime</strong>: This model explains about
+<strong>3.2%</strong> of the variation in movie ratings. The runtime of
+a film is the weakest predictor for average meeting among the
+models.</p>
+<p><strong>Appearances</strong>: This model explains about
+<strong>15%</strong> of the variation in movie ratings, suggesting that
+more appearances in user-curated lists are predictive of a higher
+rating.</p>
+<p><strong>Watches</strong>: This model explains about
+<strong>8.3%</strong> of the variation in movie ratings. While a weaker
+effect size, this suggests that total watches is modestly predictive of
+a higher rating.</p>
+<p><strong>Fans</strong>: This model explains about
+<strong>6.8%</strong> of the variation in movie ratings. The number of
+fans of a film is a very weak predictor for average rating.</p>
+<p><strong>Runtime</strong> (adjusted): This model explains about
+<strong>19.1%</strong> of the variation in movie ratings. This is the
+highest among the models and shows that once adjusting for other
+variables, runtime becomes more meaningful</p>
+<p>Out of these individual variables, appearances in user-curated lists
+are the most predictive of higher ratings. This may be explained by
+users being pushed films by an algorithm that is tailored to their past
+watch history, liked movies, and other collected data. Thus, viewers
+enjoying a film catered to their preferences are more likely to assign
+it a high rating.</p>
+<p>While the adjusted runtime model has the highest R-squared, only
+19.1% of average rating variance can be explained. More characteristics
+seem to influence a movie’s average rating.</p>
+</div>
+</div>
+<div id="cross-validation-average-rating" class="section level2">
+<h2>Cross-Validation: Average Rating</h2>
+<pre class="r"><code>cv2_df = 
+  crossv_mc(movie_df, 100)
+
+cv2_df = cv2_df %&gt;% 
+  mutate(
+    appearances_mod = map(.x = train, ~lm(average_rating ~ list_appearances, data = .x)),
+    watches_mod = map(.x = train, ~lm(average_rating ~ watches, data = .x)),
+    fans_mod = map(.x = train, ~lm(average_rating ~ fans, data = .x)),
+    runtime_mod = map(.x = train, ~lm(average_rating ~ runtime, data = .x)),
+    runtime_adj_mod = map(.x = train, ~lm(
+  average_rating ~ runtime + watches + list_appearances + fans,
+  data = .x))
+    ) |&gt; 
+
+  mutate(
+    rmse_appearances = map2_dbl(.x = appearances_mod, .y = test, ~rmse(model = .x, data = .y)), 
+    rmse_watches = map2_dbl(.x = watches_mod, .y = test, ~rmse(model = .x, data = .y)), 
+    rmse_fans = map2_dbl(.x = fans_mod, .y = test, ~rmse(model = .x, data = .y)),
+    rmse_runtime = map2_dbl(.x = runtime_mod, .y = test, ~rmse(model = .x, data = .y)),
+    rmse_runtime_adj = map2_dbl(.x = runtime_adj_mod, .y = test, ~rmse(model = .x, data = .y))
+  )
+
+cv2_df |&gt; 
+  select(starts_with(&quot;rmse&quot;)) |&gt; 
+  pivot_longer(
+    everything(),
+    names_to = &quot;model&quot;, 
+    values_to = &quot;rmse&quot;,
+    names_prefix = &quot;rmse_&quot;) |&gt; 
+  mutate(model = fct_inorder(model)) |&gt; 
+  ggplot(aes(x = model, y = rmse)) + geom_violin() +
+  labs(
+    x = &quot;Model&quot;,
+    y = &quot;RMSE&quot;,
+    title = &quot;Root Mean Squared Errors Distributions for Average Rating&quot;
+  )</code></pre>
+<p><img src="regression_files/figure-html/unnamed-chunk-14-1.png" width="90%" /></p>
+<pre class="r"><code>cv2_df |&gt; 
+  summarise(
+    mean_appearances = mean(rmse_appearances),
+    mean_watch = mean(rmse_watches),
+    mean_fans = mean(rmse_fans),
+    mean_runtime = mean(rmse_runtime),
+    mean_runtime_adj = mean(rmse_runtime_adj)
+  ) |&gt; 
+   knitr::kable()</code></pre>
+<table>
+<colgroup>
+<col width="25%" />
+<col width="16%" />
+<col width="14%" />
+<col width="19%" />
+<col width="25%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="right">mean_appearances</th>
+<th align="right">mean_watch</th>
+<th align="right">mean_fans</th>
+<th align="right">mean_runtime</th>
+<th align="right">mean_runtime_adj</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">0.4844235</td>
+<td align="right">0.503124</td>
+<td align="right">0.5081235</td>
+<td align="right">0.516459</td>
+<td align="right">0.473076</td>
+</tr>
+</tbody>
+</table>
+<p>Based on the models above, the model with runtime adjusted for
+covariates is the best to predict a movie’s average rating due to having
+the lowest RMSE, followed by appearances. Runtime individually is the
+weakest predictor.</p>
+</div>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
