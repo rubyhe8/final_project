@@ -1,0 +1,390 @@
+---
+title: "Exploratory Data Analysis"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    code_folding: hide
+---
+
+```{r include = FALSE}
+# Load libraries
+library(tidyverse)
+library(plotly)
+library(patchwork)
+```
+
+```{r include = FALSE}
+# Preset settings
+
+knitr::opts_chunk$set(
+  fig.width = 8,
+  fig.asp = .8,
+  out.width = "90%"
+)
+
+theme_set(theme_minimal() + theme(legend.position = "bottom"))
+
+options(
+  ggplot2.continuous.colour = "viridis",
+  ggplot2.continuous.fill = "viridis"
+)
+
+scale_colour_discrete = scale_colour_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
+```
+
+```{r include = FALSE}
+# Import and clean movie dataset
+movie_df = read.csv("data/letterbox_movie_classification_dataset.csv") |>
+  janitor::clean_names() |>
+  filter(original_language == "English") |>
+  select(film_title, director, average_rating, genres, runtime, original_language, description, studios, watches, list_appearances, likes, fans, lowest, medium, highest, total_ratings)
+```
+
+## Univariate Exploratory Analysis
+
+### Average Rating
+
+We are interested in looking at a films' average rating as an outcome variable. We will take a look at its distribution using a histogram. 
+
+```{r}
+movie_df |> 
+  plot_ly(x = ~average_rating,
+          type = "histogram", colors = "viridis"
+  ) |> 
+  layout(
+    title = "Distribution of Movies' Average Rating",
+    xaxis = list(title = "Average Rating"),
+    yaxis = list(title = "Count")
+  )
+```
+
+The histogram representing movie average ratings follows a normal distribution, centered at around 3.25. 
+
+### Runtime
+
+We will explore predictors possibly associated with average ratings, starting with film run time. The distribution of films' runtime is shown using a histogram below. 
+
+```{r}
+movie_df |> 
+  plot_ly(x = ~runtime,
+          type = "histogram", colors = "viridis"
+  ) |> 
+  layout(
+    title = "Distribution of Movie Runtimes",
+    xaxis = list(title = "Runtime (minutes)"),
+    yaxis = list(title = "Count")
+  )
+```
+
+The histogram representing movie runtimes follows a relatively normal distribution, with a slight right skew, centered at around 125 minutes. 
+
+### Genre
+
+```{r}
+genre_df = 
+  movie_df |>
+  mutate(genres = str_remove_all(genres, "\\[|\\]|'")) |>
+  separate_rows(genres, sep = ",\\s*")
+```
+
+```{r}
+# Clean genre 
+genre_clean_df = 
+  genre_df |> 
+  group_by(genres) |> 
+  summarize(
+    n = n()
+  ) |> 
+  arrange(desc(n)) |> 
+  filter(n > 16)
+```
+
+```{r}
+genre_clean_df |> 
+  mutate(
+    genres = fct_reorder(genres, -n)
+  ) |> 
+  plot_ly(x = ~genres, y = ~n,
+          type = "bar", colors = "viridis"
+  ) |> 
+  layout(
+    title = "Distribution of Movie Genres",
+    xaxis = list(title = "Genres"),
+    yaxis = list(title = "Count")
+  )
+```
+
+
+- number of movies per genre
+- bar/col
+Removed Unknown and genres with n <= 2
+
+
+### Watches, Fans, Likes, and List Appearance
+
+We are also interested in exploring a film's number of watches, fans, likes, and list appearances and use them as potential predictors of average rating. 
+
+```{r}
+#Number of watches
+watches_plot = 
+  movie_df |> 
+  plot_ly(x = ~watches,
+          type = "histogram", colors = "viridis"
+  ) |> 
+  layout(
+    title = "Distribution of Watches",
+    xaxis = list(title = "Number of Watches"),
+    yaxis = list(title = "Count")
+  )
+```
+
+
+```{r}
+#Number of Fans
+
+fans_plot = 
+  movie_df |> 
+    plot_ly(x = ~fans,
+          type = "histogram", colors = "viridis"
+  ) |> 
+  layout(
+    title = "Distribution of Fans",
+    xaxis = list(title = "Number of Fans"),
+    yaxis = list(title = "Count")
+  )
+```
+
+
+```{r}
+#Number of likes
+likes_plot = 
+  movie_df |> 
+    plot_ly(x = ~likes,
+          type = "histogram", colors = "viridis"
+  ) |> 
+  layout(
+    title = "Distribution of Likes",
+    xaxis = list(title = "Number of Likes"),
+    yaxis = list(title = "Count")
+  )
+```
+
+
+```{r}
+#Number of List Appearances
+
+list_plot = 
+  movie_df |> 
+    plot_ly(x = ~list_appearances,
+          type = "histogram", colors = "viridis"
+  ) |> 
+  layout(
+    title = "Distribution of List Appearances",
+    xaxis = list(title = "Number of List Appearances"),
+    yaxis = list(title = "Count")
+  )
+```
+
+```{r}
+subplot(watches_plot, fans_plot, likes_plot, list_plot, nrows = 4)
+```
+
+The histograms show that number of watches, fans, likes, and list appearances all a follow heavily right skewed distribution, with most movies centered near the lower end of the scale. Due to the skewdness of these variables, it may be relevant to transform or categorize these variables before conducting further analyses. 
+
+
+## Bivariate Exploratory Analysis
+
+### Continuous runtime vs average_rating
+
+```{r}
+movie_df |> 
+ggplot(aes(x = runtime, y = average_rating)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth() +
+  labs (title = "Relationship between Runtime and Average Rating",
+        x = "Runtime (minutes)", y = "Average Rating")
+```
+
+### Categorical runtime vs average_rating
+
+Boxplot
+
+```{r}
+runtime_rate_df =
+  movie_df |>
+  mutate(runtime_category = case_when(
+    runtime <= 90 ~ "Short",
+    runtime > 90 & runtime <= 120 ~ "Medium",
+    runtime > 120 ~ "Long"
+  ))
+
+runtime_rate_df |>
+  group_by(runtime_category) |>
+  summarise(avg_rating = mean(average_rating, na.rm = TRUE)) |>
+  arrange(desc(avg_rating))
+
+runtime_rate_df |> 
+  ggplot(aes(x = runtime_category, y = average_rating)) +
+  geom_boxplot()
+
+
+runtime_rate_df |>
+  group_by(runtime_category) |>
+  summarize(
+    n = n()
+  )
+
+ 
+
+runtime_rate_alt2_df = 
+  movie_df |>
+  mutate(runtime_category = case_when(
+    runtime <= 100 ~ "Short",
+    runtime > 100 ~ "Long"
+  ))
+
+runtime_rate_alt2_df |> 
+  ggplot(aes(x = runtime_category, y = average_rating)) +
+  geom_boxplot()
+  
+runtime_rate_alt2_df |>
+  group_by(runtime_category) |>
+  summarize(
+    n = n()
+  ) |>
+  arrange(desc(n))
+
+```
+
+### Total ratings vs Average Rating
+
+```{r}
+total_avg_rating = 
+  movie_df |> 
+  ggplot(aes(x = log(total_ratings), y = average_rating)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth() +
+  labs(title = "Relationship between Total Ratings and Average Rating",
+        x = "Total Ratings", y = "Average Rating")
+```
+
+### Watches, fans, likes, and list appearances vs Average Ratings
+
+```{r}
+#watches vs average rating
+watches_avg_rating = 
+  movie_df |> 
+  ggplot(aes(x = log(watches), y = average_rating)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth() +
+  labs (title = "Relationship between Total Ratings and Average Rating",
+        x = "Total Ratings", y = "Average Rating")
+```
+
+```{r}
+#fans vs average rating
+fans_avg_rating = 
+  movie_df |> 
+  ggplot(aes(x = log(fans), y = average_rating)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth() +
+  labs (title = "Relationship between Fans and Average Rating",
+        x = "Fans", y = "Average Rating")
+```
+
+```{r}
+# likes vs average rating
+likes_avg_rating = 
+  movie_df |> 
+  ggplot(aes(x = log(likes), y = average_rating)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth() +
+  labs(title = "Relationship between Likes and Average Rating",
+        x = "Likes", y = "Average Rating")
+```
+
+```{r}
+# list appearances vs average rating
+list_avg_rating = 
+  movie_df |> 
+  ggplot(aes(x = log(list_appearances), y = average_rating)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth() +
+  labs(title = "Relationship between Likes and Average Rating",
+        x = "Likes", y = "Average Rating")
+```
+
+```{r}
+(watches_avg_rating + fans_avg_rating )/ (likes_avg_rating + list_avg_rating)
+```
+
+
+### Average rating per genre
+
+```{r}
+genre_rating = 
+  genre_df |> 
+  group_by(genres) |> 
+  summarize(
+    avg_rating = mean(average_rating)
+  ) |> 
+  filter(genres %in% c("Action", "Adventure", "Animation", "Comedy", "Crime", "Documentary", "Drama", "Thriller", "Horror", "Romance", "Science Fiction", "Fantasy", "Mystery", "Family", "History", "Music", "War", "Western", "TV Movie")) 
+
+genre_df |> 
+  filter(genres %in% c("Action", "Adventure", "Animation", "Comedy", "Crime", "Documentary", "Drama", "Thriller", "Horror", "Romance", "Science Fiction", "Fantasy", "Mystery", "Family", "History", "Music", "War", "Western", "TV Movie")) |> 
+  ggplot(aes(x = genres, y = average_rating)) +
+  geom_boxplot()
+
+
+```
+
+## Top Films
+
+```{r}
+#create function for top film
+
+top_film = function(df, variable) {
+  
+  table = 
+    df |>
+    arrange(desc({{variable}})) |>
+    select(film_title, director, {{variable}}) |>
+    slice_head(n = 5) |> 
+    knitr::kable()
+
+  table
+  
+}
+```
+
+### Top watched films 
+
+```{r}
+top_film(movie_df, watches)
+```
+
+### Top rated films 
+
+```{r}
+top_film(movie_df, average_rating)
+```
+
+### Films with most fans
+
+```{r}
+top_film(movie_df, fans)
+```
+
+### Films with most likes
+
+```{r}
+top_film(movie_df, likes)
+```
+
+### Films with most list appearances
+
+```{r}
+top_film(movie_df, list_appearances)
+```
