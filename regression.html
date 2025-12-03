@@ -442,7 +442,6 @@ movie_df |&gt;
     x = &quot;Runtime (minutes)&quot;,
     y = &quot;Average Rating&quot;
   )</code></pre>
-<pre><code>## `geom_smooth()` using formula = &#39;y ~ x&#39;</code></pre>
 <p><img src="regression_files/figure-html/unnamed-chunk-5-1.png" width="90%" /></p>
 <pre class="r"><code>runtime_model = lm(average_rating ~ runtime, data = movie_df)
 
@@ -487,7 +486,6 @@ movie_df |&gt;
     x = &quot;log(Runtime)&quot;,
     y = &quot;Average Rating&quot;
   )</code></pre>
-<pre><code>## `geom_smooth()` using formula = &#39;y ~ x&#39;</code></pre>
 <p><img src="regression_files/figure-html/unnamed-chunk-7-1.png" width="90%" /></p>
 <pre class="r"><code># Model with log-transformed runtime
 runtime_log_model = lm(average_rating ~ log(runtime), data = movie_df)
@@ -530,7 +528,6 @@ runtime_interaction_model |&gt;
     y = &quot;Average Rating&quot;,
     color = &quot;Runtime Category&quot;
   )</code></pre>
-<pre><code>## `geom_smooth()` using formula = &#39;y ~ x&#39;</code></pre>
 <p><img src="regression_files/figure-html/unnamed-chunk-9-1.png" width="90%" />
 WRITE INTERPRETATION</p>
 </div>
@@ -546,7 +543,6 @@ class="section level2">
     y = &quot;Average Rating&quot;,
     title = &quot;Linear Relationship Betweem Appearances on User-Curated Lists and Average Rating&quot;
   )</code></pre>
-<pre><code>## `geom_smooth()` using formula = &#39;y ~ x&#39;</code></pre>
 <p><img src="regression_files/figure-html/unnamed-chunk-10-1.png" width="90%" /></p>
 <pre class="r"><code>appearances_model = lm(average_rating ~ list_appearances, data = movie_df)
 
@@ -595,7 +591,6 @@ rating.</p>
     y = &quot;Average Rating&quot;,
     title = &quot;Linear Relationship Between Total Watches and Average Rating&quot;
   )</code></pre>
-<pre><code>## `geom_smooth()` using formula = &#39;y ~ x&#39;</code></pre>
 <p><img src="regression_files/figure-html/unnamed-chunk-11-1.png" width="90%" /></p>
 <pre class="r"><code>watches_model = lm(average_rating ~ watches, data = movie_df)
 
@@ -636,43 +631,18 @@ statistically significant in predicting its average rating.</p>
 <div id="fans-vs.-average-rating" class="section level2">
 <h2>Fans vs. Average Rating</h2>
 <pre class="r"><code>movie_df |&gt; 
-  ggplot(aes(fans, average_rating)) +
+  ggplot(aes(log(fans), average_rating)) +
   geom_point() +
   geom_smooth(method = &quot;lm&quot;, se = TRUE) +
-  scale_x_log10() +
   labs(
-    x = &quot;Number of Fans (Log Scale)&quot;,
+    x = &quot;log(Fans&quot;,
     y = &quot;Average Rating&quot;,
-    title = &quot;Linear Relationship Between Number of Fans (Log Scale) and Average Rating&quot;
+    title = &quot;Linear Relationship Between Number of log(fans) and Average Rating&quot;
   )</code></pre>
-<pre><code>## Warning in scale_x_log10(): log-10 transformation introduced infinite values.
-## log-10 transformation introduced infinite values.</code></pre>
-<pre><code>## `geom_smooth()` using formula = &#39;y ~ x&#39;</code></pre>
-<pre><code>## Warning: Removed 1295 rows containing non-finite outside the scale range
-## (`stat_smooth()`).</code></pre>
 <p><img src="regression_files/figure-html/unnamed-chunk-12-1.png" width="90%" /></p>
 <pre class="r"><code>fans_model = lm(average_rating ~ fans, data = movie_df) 
 
-summary(fans_model)</code></pre>
-<pre><code>## 
-## Call:
-## lm(formula = average_rating ~ fans, data = movie_df)
-## 
-## Residuals:
-##     Min      1Q  Median      3Q     Max 
-## -3.2655 -0.3009  0.0733  0.3351  1.5149 
-## 
-## Coefficients:
-##              Estimate Std. Error t value Pr(&gt;|t|)    
-## (Intercept) 3.187e+00  5.716e-03  557.46   &lt;2e-16 ***
-## fans        1.377e-05  5.659e-07   24.33   &lt;2e-16 ***
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## 
-## Residual standard error: 0.5057 on 8072 degrees of freedom
-## Multiple R-squared:  0.06834,    Adjusted R-squared:  0.06822 
-## F-statistic: 592.1 on 1 and 8072 DF,  p-value: &lt; 2.2e-16</code></pre>
-<pre class="r"><code>fans_model |&gt; 
+fans_model |&gt; 
   broom::tidy() |&gt; 
   select(term, estimate, p.value) |&gt; 
   mutate(p.value = formatC(p.value, format = &quot;e&quot;, digits = 3)) |&gt; 
@@ -865,9 +835,9 @@ cv2_df |&gt;
 </tbody>
 </table>
 <p>Based on the models above, the model with runtime adjusted for
-covariates is the best model to predict a movie’s average rating due to
-having the lowest RMSE, followed by appearances. Runtime individually is
-the weakest predictor.</p>
+covariates is the best to predict a movie’s average rating due to having
+the lowest RMSE, followed by appearances. Runtime individually is the
+weakest predictor.</p>
 </div>
 </div>
 

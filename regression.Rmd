@@ -77,7 +77,7 @@ genre_wide = genre_df |>
 # Linear Models
 
 ## Runtime vs. Average Rating
-```{r}
+```{r, message = FALSE}
 # Scatterplot 
 movie_df |> 
   ggplot(aes(runtime, average_rating)) +
@@ -98,7 +98,7 @@ runtime_model |>
 
 ```
 ## Runtime vs. Average Rating, adjusted for covariates
-```{r}
+```{r, message = FALSE}
 
 runtime_adj_model = lm(
   average_rating ~ runtime + watches + list_appearances + fans,
@@ -111,7 +111,7 @@ runtime_adj_model |>
 
 ```
 
-```{r}
+```{r, message = FALSE}
 ## Log-Transformed Runtime vs Average Rating
 
 # Scatterplot with log(runtime)
@@ -136,7 +136,7 @@ runtime_log_model |>
 ```
 
 Dictotomizing Runtime (above and below 90 mins)
-```{r}
+```{r, message = FALSE}
 movie_df = movie_df |>
   mutate(
     runtime_cat = if_else(runtime < 90, "Short (<90 min)", "Long (≥90 min)")
@@ -164,7 +164,7 @@ movie_df |>
 WRITE INTERPRETATION
 
 ## Appearances in User-Curated Lists vs. Average Rating
-```{r}
+```{r, message = FALSE}
 movie_df |> 
   ggplot(aes(list_appearances, average_rating)) +
   geom_point() +
@@ -189,7 +189,7 @@ The coefficient for `list_appearances` is **3.39-e06**, which represents the est
 The model's p-value is **3.44e-288**, which indicates that the number of times the movie appears in user-curated lists is extremely statistically significant in predicting its average rating.
 
 ## Total Watches vs. Average Rating
-```{r}
+```{r, message = FALSE, warning = FALSE}
 movie_df |> 
   ggplot(aes(watches, average_rating)) +
   geom_point() +
@@ -214,21 +214,18 @@ The coefficient for `watches` is **3.04-e07**, which represents the estimated in
 The model's p-value is **7.41e-154**, which indicates that the number of times the movie has been watched is extremely statistically significant in predicting its average rating.
 
 ## Fans vs. Average Rating
-```{r}
+```{r, message = FALSE, warning = FALSE}
 movie_df |> 
-  ggplot(aes(fans, average_rating)) +
+  ggplot(aes(log(fans), average_rating)) +
   geom_point() +
   geom_smooth(method = "lm", se = TRUE) +
-  scale_x_log10() +
   labs(
-    x = "Number of Fans (Log Scale)",
+    x = "log(Fans",
     y = "Average Rating",
-    title = "Linear Relationship Between Number of Fans (Log Scale) and Average Rating"
+    title = "Linear Relationship Between Number of log(fans) and Average Rating"
   )
 
 fans_model = lm(average_rating ~ fans, data = movie_df) 
-
-summary(fans_model)
 
 fans_model |> 
   broom::tidy() |> 
@@ -326,4 +323,4 @@ cv2_df |>
    knitr::kable()
 ```
 
-Based on the models above, the model with runtime adjusted for covariates is the best model to predict a movie's average rating due to having the lowest RMSE, followed by appearances. Runtime individually is the weakest predictor.
+Based on the models above, the model with runtime adjusted for covariates is the best to predict a movie's average rating due to having the lowest RMSE, followed by appearances. Runtime individually is the weakest predictor.
