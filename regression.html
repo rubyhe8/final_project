@@ -438,6 +438,17 @@ runtime_model |&gt;
 ##   &lt;chr&gt;          &lt;dbl&gt;    &lt;dbl&gt;
 ## 1 (Intercept)  2.95    0       
 ## 2 runtime      0.00258 1.04e-59</code></pre>
+<p>Model: <code>average_rating</code> = β0 +
+β1(<code>runtime</code>)</p>
+<p>The coefficient for <code>runtime</code> is <strong>0.00258</strong>,
+which represents the estimated increase in average rating for each unit
+increase in runtime mintues.</p>
+<p>The model’s p-value is <strong>1.04e-59</strong>, which indicates
+that runtime is a significant predictor of average rating.</p>
+<p>Though, based on the numbers a linear model makes sense, when looking
+at the graphs there does not seem to be an apparent linear realtionship
+and therefore further analysis was done in order to see if there is a
+better model for the association between runtime and average rating.</p>
 </div>
 <div id="runtime-vs.-average-rating-adjusted-for-covariates"
 class="section level2">
@@ -458,6 +469,10 @@ runtime_adj_model |&gt;
 ## 3 watches          -0.000000431 4.77e- 60
 ## 4 list_appearances  0.00000676  3.78e-168
 ## 5 fans             -0.00000229  3.05e-  3</code></pre>
+<p>When Runtime is into the full model including watches,
+list_appearances and fans, the coefficient became way smaller to
+1.57e-0.3 and the p-value decreased to 7.89e-27. Which makes it more
+signifanct yet when put with all the other predictors.</p>
 <pre class="r"><code>## Log-Transformed Runtime vs Average Rating
 
 # Scatterplot with log(runtime)
@@ -482,6 +497,11 @@ runtime_log_model |&gt;
 ##   &lt;chr&gt;           &lt;dbl&gt;         &lt;dbl&gt;
 ## 1 (Intercept)    2.85   0            
 ## 2 log(runtime)   0.0790 0.00000000937</code></pre>
+<p>Model: <code>average_rating</code> = β0 + β1(log<code>runtime</code>)
+When the runtime variable model was put into a log transformation there
+is improvement in the model in terms of visuals but the and the p-value
+is <em>9.37e-09</em> is bigger than the one in the linear model but
+still stands significant.</p>
 <p>Dictotomizing Runtime (above and below 90 mins)</p>
 <pre class="r"><code>movie_df = movie_df |&gt;
   mutate(
@@ -513,7 +533,14 @@ runtime_interaction_model |&gt;
     color = &quot;Runtime Category&quot;
   )</code></pre>
 <p><img src="regression_files/figure-html/unnamed-chunk-6-1.png" width="90%" />
-WRITE INTERPRETATION</p>
+Dichotomizing the variables to greater and less than 90 mins made the
+model more accurate and better to visualize. Runtime seems to be a hard
+variable to work with in general given the amount of possible outcomes
+and different run times. Though when put in the overall model it works
+well as a predictor and the longer the moive the higher the rating for
+movies over 90 mins but the longer the movie the lower the rating for
+movies under 90 mins. This is a interesting comparision to big more
+into.</p>
 </div>
 <div id="appearances-in-user-curated-lists-vs.-average-rating"
 class="section level2">
