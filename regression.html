@@ -398,39 +398,20 @@ options(
 scale_colour_discrete = scale_colour_viridis_d
 scale_fill_discrete = scale_fill_viridis_d
 
-set.seed(1)</code></pre>
-<p>Import data and organize genre</p>
-<pre class="r"><code>movie_df = read.csv(&quot;data/letterbox_movie_classification_dataset.csv&quot;) |&gt;
+set.seed(1)
+
+movie_df = read.csv(&quot;data/letterbox_movie_classification_dataset.csv&quot;) |&gt;
   janitor::clean_names() |&gt;
   filter(original_language == &quot;English&quot;) |&gt;
   select(film_title, director, average_rating, genres, runtime, original_language, description, studios, watches, list_appearances, likes, fans, lowest, medium, highest, total_ratings)</code></pre>
-<pre class="r"><code>genre_df = movie_df |&gt;
-  mutate(genres = str_remove_all(genres, &quot;\\[|\\]|&#39;&quot;)) |&gt;
-  separate_rows(genres, sep = &quot;,\\s*&quot;)</code></pre>
-<pre class="r"><code>genre_wide = genre_df |&gt; 
-  mutate(
-    studios = as.character(studios),
-    description = as.character(description),
-    genres = as.character(genres)
-  ) |&gt; 
-  mutate(value = 1) |&gt; 
-  group_by(
-    film_title, director, average_rating, runtime, original_language,
-    description, studios, watches, list_appearances, likes, fans,
-    lowest, medium, highest, total_ratings, genres
-  ) |&gt; 
-  summarise(value = max(value), .groups = &quot;drop&quot;) |&gt;
-  pivot_wider(
-    id_cols = c(
-      film_title, director, average_rating, runtime, original_language,
-      description, studios, watches, list_appearances, likes, fans,
-      lowest, medium, highest, total_ratings
-    ),
-    names_from = genres,
-    values_from = value,
-    values_fill = 0
-  ) |&gt; 
-  janitor::clean_names()</code></pre>
+<p>Besides building a model with predictors that would give us the
+optimal model, we also wanted to look at the association of
+<code>average_rating</code> with the model’s individual predictors
+<code>runtime</code>, <code>list_appearances</code>,
+<code>watches</code>, and <code>fans</code> through simple linear
+regression models as well as <code>runtime</code> as the main effect,
+adjusting for covariates. We then compared these variables to one
+another to determine the best predictors for a movie’s rating.</p>
 <div id="linear-models" class="section level1">
 <h1>Linear Models</h1>
 <div id="runtime-vs.-average-rating" class="section level2">
@@ -445,7 +426,7 @@ movie_df |&gt;
     x = &quot;Runtime (minutes)&quot;,
     y = &quot;Average Rating&quot;
   )</code></pre>
-<p><img src="regression_files/figure-html/unnamed-chunk-5-1.png" width="90%" /></p>
+<p><img src="regression_files/figure-html/unnamed-chunk-2-1.png" width="90%" /></p>
 <pre class="r"><code>runtime_model = lm(average_rating ~ runtime, data = movie_df)
 
 #Hypothesis Test
@@ -489,7 +470,7 @@ movie_df |&gt;
     x = &quot;log(Runtime)&quot;,
     y = &quot;Average Rating&quot;
   )</code></pre>
-<p><img src="regression_files/figure-html/unnamed-chunk-7-1.png" width="90%" /></p>
+<p><img src="regression_files/figure-html/unnamed-chunk-4-1.png" width="90%" /></p>
 <pre class="r"><code># Model with log-transformed runtime
 runtime_log_model = lm(average_rating ~ log(runtime), data = movie_df)
 
@@ -531,7 +512,7 @@ runtime_interaction_model |&gt;
     y = &quot;Average Rating&quot;,
     color = &quot;Runtime Category&quot;
   )</code></pre>
-<p><img src="regression_files/figure-html/unnamed-chunk-9-1.png" width="90%" />
+<p><img src="regression_files/figure-html/unnamed-chunk-6-1.png" width="90%" />
 WRITE INTERPRETATION</p>
 </div>
 <div id="appearances-in-user-curated-lists-vs.-average-rating"
@@ -544,9 +525,10 @@ class="section level2">
   labs(
     x = &quot;Appearances&quot;,
     y = &quot;Average Rating&quot;,
-    title = &quot;Linear Relationship Betweem Appearances on User-Curated Lists and Average Rating&quot;
+    title = &quot;Linear Relationship Betweem Appearances on User-Curated Lists 
+and Average Rating&quot;
   )</code></pre>
-<p><img src="regression_files/figure-html/unnamed-chunk-10-1.png" width="90%" /></p>
+<p><img src="regression_files/figure-html/unnamed-chunk-7-1.png" width="90%" /></p>
 <pre class="r"><code>appearances_model = lm(average_rating ~ list_appearances, data = movie_df)
 
 appearances_model |&gt; 
@@ -575,6 +557,8 @@ appearances_model |&gt;
 </tr>
 </tbody>
 </table>
+<p>Model: <code>average_rating</code> = β0 +
+β1(<code>list_appearances</code>)</p>
 <p>The coefficient for <code>list_appearances</code> is
 <strong>3.39-e06</strong>, which represents the estimated increase in
 rating for each unit increase in appearances in user-curated lists.</p>
@@ -594,7 +578,7 @@ rating.</p>
     y = &quot;Average Rating&quot;,
     title = &quot;Linear Relationship Between Total Watches and Average Rating&quot;
   )</code></pre>
-<p><img src="regression_files/figure-html/unnamed-chunk-11-1.png" width="90%" /></p>
+<p><img src="regression_files/figure-html/unnamed-chunk-8-1.png" width="90%" /></p>
 <pre class="r"><code>watches_model = lm(average_rating ~ watches, data = movie_df)
 
 watches_model |&gt; 
@@ -623,6 +607,8 @@ watches_model |&gt;
 </tr>
 </tbody>
 </table>
+<p>Model: <code>average_rating</code> = β0 +
+β1(<code>watches</code>)</p>
 <p>The coefficient for <code>watches</code> is
 <strong>3.04-e07</strong>, which represents the estimated increase in
 rating for each unit increase in the total number of times the movie
@@ -642,7 +628,7 @@ statistically significant in predicting its average rating.</p>
     y = &quot;Average Rating&quot;,
     title = &quot;Linear Relationship Between Number of log(fans) and Average Rating&quot;
   )</code></pre>
-<p><img src="regression_files/figure-html/unnamed-chunk-12-1.png" width="90%" /></p>
+<p><img src="regression_files/figure-html/unnamed-chunk-9-1.png" width="90%" /></p>
 <pre class="r"><code>fans_model = lm(average_rating ~ fans, data = movie_df) 
 
 fans_model |&gt; 
@@ -671,6 +657,7 @@ fans_model |&gt;
 </tr>
 </tbody>
 </table>
+<p>Model: <code>average_rating</code> = β0 + β1(<code>fans</code>)</p>
 <p>Due to <code>fans</code> being extremely skewed and having a wide
 value range, we used log scale to reduce extreme outliers and depict any
 linear relationships.</p>
@@ -683,7 +670,7 @@ that the number of fans is is extremely statistically significant in
 predicting its average rating.</p>
 <div id="whats-with-the-extreme-numbers" class="section level3">
 <h3>What’s with the extreme numbers?</h3>
-<p>You might be wondering why both the coefficients and p-values are so
+<p>You might be wondering why the coefficients and p-values are so
 small. First, consider the nature of our predictors. The number of
 appearances in user-curated lists, watches, and fans can easily reach
 the hundreds of thousands. For example, 100,000 more appearances
@@ -753,10 +740,10 @@ highest among the models and shows that once adjusting for other
 variables, runtime becomes more meaningful</p>
 <p>Out of these individual variables, appearances in user-curated lists
 are the most predictive of higher ratings. This may be explained by
-users being pushed films by an algorithm that is tailored to their past
+users being pushed films by an algorithm that are tailored to their past
 watch history, liked movies, and other collected data. Thus, viewers
-enjoying a film catered to their preferences are more likely to assign
-it a high rating.</p>
+enjoying a film that aligns with their preferences are more likely to
+assign it a high rating.</p>
 <p>While the adjusted runtime model has the highest R-squared, only
 19.1% of average rating variance can be explained. More characteristics
 seem to influence a movie’s average rating.</p>
@@ -800,7 +787,7 @@ cv2_df |&gt;
     y = &quot;RMSE&quot;,
     title = &quot;Root Mean Squared Errors Distributions for Average Rating&quot;
   )</code></pre>
-<p><img src="regression_files/figure-html/unnamed-chunk-14-1.png" width="90%" /></p>
+<p><img src="regression_files/figure-html/unnamed-chunk-11-1.png" width="90%" /></p>
 <pre class="r"><code>cv2_df |&gt; 
   summarise(
     mean_appearances = mean(rmse_appearances),
@@ -838,9 +825,9 @@ cv2_df |&gt;
 </tbody>
 </table>
 <p>Based on the models above, the model with runtime adjusted for
-covariates is the best to predict a movie’s average rating due to having
-the lowest RMSE, followed by appearances. Runtime individually is the
-weakest predictor.</p>
+covariates, having the lowest RMSE, is the best to predict a movie’s
+average rating. The second strongest model has appearances as the only
+predictor. Runtime individually is the weakest predictor.</p>
 </div>
 </div>
 
