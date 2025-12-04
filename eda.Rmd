@@ -12,9 +12,7 @@ output:
 library(tidyverse)
 library(plotly)
 library(patchwork)
-```
 
-```{r include = FALSE}
 # Preset settings
 
 knitr::opts_chunk$set(
@@ -32,9 +30,7 @@ options(
 
 scale_colour_discrete = scale_colour_viridis_d
 scale_fill_discrete = scale_fill_viridis_d
-```
 
-```{r include = FALSE}
 # Import and clean movie dataset
 movie_df = read.csv("data/letterbox_movie_classification_dataset.csv") |>
   janitor::clean_names() |>
@@ -87,9 +83,7 @@ genre_df =
   movie_df |>
   mutate(genres = str_remove_all(genres, "\\[|\\]|'")) |>
   separate_rows(genres, sep = ",\\s*")
-```
 
-```{r}
 # Clean genre 
 genre_clean_df = 
   genre_df |> 
@@ -99,9 +93,7 @@ genre_clean_df =
   ) |> 
   arrange(desc(n)) |> 
   filter(n > 16)
-```
 
-```{r}
 genre_clean_df |> 
   mutate(
     genres = fct_reorder(genres, -n)
@@ -115,7 +107,6 @@ genre_clean_df |>
     yaxis = list(title = "Count")
   )
 ```
-
 
 - number of movies per genre
 - bar/col
@@ -138,10 +129,7 @@ watches_plot =
     xaxis = list(title = "Number of Watches"),
     yaxis = list(title = "Count")
   )
-```
 
-
-```{r}
 #Number of Fans
 
 fans_plot = 
@@ -154,10 +142,7 @@ fans_plot =
     xaxis = list(title = "Number of Fans"),
     yaxis = list(title = "Count")
   )
-```
 
-
-```{r}
 #Number of likes
 likes_plot = 
   movie_df |> 
@@ -169,10 +154,7 @@ likes_plot =
     xaxis = list(title = "Number of Likes"),
     yaxis = list(title = "Count")
   )
-```
 
-
-```{r}
 #Number of List Appearances
 
 list_plot = 
@@ -185,9 +167,7 @@ list_plot =
     xaxis = list(title = "Number of List Appearances"),
     yaxis = list(title = "Count")
   )
-```
 
-```{r}
 subplot(watches_plot, fans_plot, likes_plot, list_plot, nrows = 4)
 ```
 
@@ -197,8 +177,7 @@ The histograms show that number of watches, fans, likes, and list appearances al
 ## Bivariate Exploratory Analysis
 
 ### Continuous runtime vs average_rating
-
-```{r}
+```{r, message = FALSE}
 movie_df |> 
 ggplot(aes(x = runtime, y = average_rating)) +
   geom_point(alpha = 0.5) +
@@ -272,7 +251,7 @@ total_avg_rating =
 
 ### Watches, fans, likes, and list appearances vs Average Ratings
 
-```{r}
+```{r, message = FALSE, warning = FALSE}
 #watches vs average rating
 watches_avg_rating = 
   movie_df |> 
@@ -281,9 +260,7 @@ watches_avg_rating =
   geom_smooth() +
   labs (title = "Relationship between Total Ratings and Average Rating",
         x = "Total Ratings", y = "Average Rating")
-```
 
-```{r}
 #fans vs average rating
 fans_avg_rating = 
   movie_df |> 
@@ -292,9 +269,7 @@ fans_avg_rating =
   geom_smooth() +
   labs (title = "Relationship between Fans and Average Rating",
         x = "Fans", y = "Average Rating")
-```
 
-```{r}
 # likes vs average rating
 likes_avg_rating = 
   movie_df |> 
@@ -303,9 +278,7 @@ likes_avg_rating =
   geom_smooth() +
   labs(title = "Relationship between Likes and Average Rating",
         x = "Likes", y = "Average Rating")
-```
 
-```{r}
 # list appearances vs average rating
 list_avg_rating = 
   movie_df |> 
@@ -314,9 +287,7 @@ list_avg_rating =
   geom_smooth() +
   labs(title = "Relationship between Likes and Average Rating",
         x = "Likes", y = "Average Rating")
-```
 
-```{r}
 (watches_avg_rating + fans_avg_rating )/ (likes_avg_rating + list_avg_rating)
 ```
 
