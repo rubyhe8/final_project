@@ -414,9 +414,9 @@ options(
 scale_colour_discrete = scale_colour_viridis_d
 scale_fill_discrete = scale_fill_viridis_d
 
-set.seed(1)</code></pre>
-<p>import in movie_df</p>
-<pre class="r"><code>model_movie_df = read.csv(&quot;data/letterbox_movie_classification_dataset.csv&quot;) |&gt;
+set.seed(1)
+
+model_movie_df = read.csv(&quot;data/letterbox_movie_classification_dataset.csv&quot;) |&gt;
   janitor::clean_names() |&gt;
   filter(original_language == &quot;English&quot;) |&gt;
   select(average_rating, runtime, watches, list_appearances, likes, fans, lowest, medium, highest, total_ratings)</code></pre>
@@ -471,7 +471,7 @@ model_movie_df |&gt;
   geom_hline(yintercept = 0) +
   geom_smooth(method = &quot;loess&quot;, se = FALSE)</code></pre>
 <pre><code>## `geom_smooth()` using formula = &#39;y ~ x&#39;</code></pre>
-<p><img src="model_files/figure-html/unnamed-chunk-5-1.png" width="90%" /></p>
+<p><img src="model_files/figure-html/unnamed-chunk-4-1.png" width="90%" /></p>
 <pre class="r"><code>linear_model |&gt; broom::glance()</code></pre>
 <pre><code>## # A tibble: 1 × 12
 ##   r.squared adj.r.squared sigma statistic p.value    df logLik    AIC    BIC
@@ -489,7 +489,7 @@ model_movie_df |&gt;
   geom_hline(yintercept = 0) +
   geom_smooth(method = &quot;loess&quot;, se = FALSE)</code></pre>
 <pre><code>## `geom_smooth()` using formula = &#39;y ~ x&#39;</code></pre>
-<p><img src="model_files/figure-html/unnamed-chunk-6-1.png" width="90%" /></p>
+<p><img src="model_files/figure-html/unnamed-chunk-5-1.png" width="90%" /></p>
 <pre class="r"><code>gam_model |&gt; 
   broom::glance()</code></pre>
 <pre><code>## # A tibble: 1 × 9
@@ -527,7 +527,7 @@ cv_df |&gt;
     names_prefix = &quot;rmse_&quot;) |&gt; 
   mutate(model = fct_inorder(model)) |&gt; 
   ggplot(aes(x = model, y = rmse)) + geom_violin()</code></pre>
-<p><img src="model_files/figure-html/unnamed-chunk-7-1.png" width="90%" /></p>
+<p><img src="model_files/figure-html/unnamed-chunk-6-1.png" width="90%" /></p>
 <p>we want to use a smooth model &gt; a linear model</p>
 <ul>
 <li>smooth model has lower rmse</li>

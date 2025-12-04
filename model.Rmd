@@ -34,10 +34,7 @@ scale_colour_discrete = scale_colour_viridis_d
 scale_fill_discrete = scale_fill_viridis_d
 
 set.seed(1)
-```
 
-import in movie_df
-```{r}
 model_movie_df = read.csv("data/letterbox_movie_classification_dataset.csv") |>
   janitor::clean_names() |>
   filter(original_language == "English") |>
