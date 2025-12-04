@@ -327,17 +327,32 @@ div.tocify {
         
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        <li>
-  <a href="about.html">About</a>
+        <li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    About
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="Data-Cleaning.html">Data Cleaning</a>
+    </li>
+    <li>
+      <a href="proposal.html">Proposal</a>
+    </li>
+    <li>
+      <a href="team.html">Meet the Team</a>
+    </li>
+  </ul>
 </li>
 <li>
   <a href="eda.html">Exploratory Data Analysis</a>
 </li>
 <li>
-  <a href="model.html">Model Building</a>
+  <a href="regression.html">Regression Analysis</a>
 </li>
 <li>
-  <a href="regression.html">Regression Analysis</a>
+  <a href="model.html">Model Building</a>
 </li>
 <li>
   <a href="report.html">Report</a>
@@ -390,6 +405,32 @@ film would captivate audiences.</p>
 </div>
 <div id="initial-questions" class="section level3">
 <h3>Initial Questions</h3>
+<p>Through our analysis, we are trying to understand what factors
+contribute to higher ratings of movies. We were initially drawn to this
+dataset because of the variety of variables it provided. This Letterboxd
+dataset contained information about movie runtime, movie genre,
+directors, and a variety of measurements of movie rating and perceived
+success. We initially were very interested in answering the question of
+are films directed by more “famous” directors more likely to have higher
+ratings? And how does genre play into this? Many directors tend to stick
+to their niche, and we were curious to see how their films performed
+when they stayed in their niche or not. We also noted that the dataset
+contained information about film and production studios, and we wanted
+to know how ratings would change dependent on bigger more well known
+studies and smaller lesser known ones.</p>
+<p>Unfortunately this idea met some challenges. Despite our dataset
+being robust, variables like genre, studio, and director had multiple
+entries for each movie and we ran into challenges separating them, and
+most importantly conducting regression analysis on it. With this in
+mind, we decided to shift our research question to look more at how
+certain continuous variables contribute to average rating.</p>
+<p>As we did this, we explored how each variable individually was
+associated with average rating, and shifted our question and curiousity
+to if these variables together can come together to create a prediction
+model that is able to accurately estimate the rating of a film based on
+factors like movie run time, number of watches, the number of times it
+appears on Letterboxd, and how many watchers identfy as fans of the
+film.</p>
 </div>
 <div id="data" class="section level3">
 <h3>Data</h3>
@@ -413,6 +454,39 @@ log-transformation or dichotomizing <code>runtime</code> into short
 remained a difficult variable to model on its own. This suggests that,
 individually, <code>runtime</code> provides limited insight into what
 drives audience reception.</p>
+<pre class="r"><code>appearances_plot = movie_df |&gt; 
+  ggplot(aes(list_appearances, average_rating)) +
+  geom_point() +
+  geom_smooth(method = &quot;lm&quot;, se = TRUE) +
+  labs(
+    x = &quot;Appearances&quot;,
+    y = &quot;Average Rating&quot;,
+    title = &quot;Linear Relationship Betweem Appearances on User-Curated Lists 
+and Average Rating&quot;
+  )
+
+watches_plot = movie_df |&gt; 
+  ggplot(aes(watches, average_rating)) +
+  geom_point() +
+  geom_smooth(method = &quot;lm&quot;, se = TRUE) +
+  labs(
+    x = &quot;Total Watches&quot;,
+    y = &quot;Average Rating&quot;,
+    title = &quot;Linear Relationship Between Total Watches and Average Rating&quot;
+  )
+
+fans_plot = movie_df |&gt; 
+  ggplot(aes(log(fans), average_rating)) +
+  geom_point() +
+  geom_smooth(method = &quot;lm&quot;, se = TRUE) +
+  labs(
+    x = &quot;log(Fans&quot;,
+    y = &quot;Average Rating&quot;,
+    title = &quot;Linear Relationship Between Number of log(fans) and Average Rating&quot;
+  )
+
+appearances_plot / watches_plot / fans_plot</code></pre>
+<p><img src="report_files/figure-html/unnamed-chunk-2-1.png" width="90%" /></p>
 <p>Next, we explored alternative predictors that reflect audience
 engagement, appearances on user-curated lists
 <code>list_appearances</code>, total <code>watches</code>, and number of
@@ -425,16 +499,148 @@ ratings (R² ≈ 0.15), followed by total watches (R² ≈ 0.083) and fans (R²
 and recommended within the platform tend to earn higher ratings which is
 possibly due to how many platforms make individualized recommendations
 for its viewers.</p>
+<pre class="r"><code>runtime_adj_model = lm(
+  average_rating ~ runtime + watches + list_appearances + fans,
+  data = movie_df
+)
+
+runtime_adj_model |&gt; 
+  broom::tidy() |&gt; 
+  select(term, estimate, p.value) |&gt;
+  mutate(p.value = formatC(p.value, format = &quot;e&quot;, digits = 3)) |&gt; 
+  knitr::kable()</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">term</th>
+<th align="right">estimate</th>
+<th align="left">p.value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">(Intercept)</td>
+<td align="right">2.9416732</td>
+<td align="left">0.000e+00</td>
+</tr>
+<tr class="even">
+<td align="left">runtime</td>
+<td align="right">0.0015765</td>
+<td align="left">7.893e-27</td>
+</tr>
+<tr class="odd">
+<td align="left">watches</td>
+<td align="right">-0.0000004</td>
+<td align="left">4.771e-60</td>
+</tr>
+<tr class="even">
+<td align="left">list_appearances</td>
+<td align="right">0.0000068</td>
+<td align="left">3.781e-168</td>
+</tr>
+<tr class="odd">
+<td align="left">fans</td>
+<td align="right">-0.0000023</td>
+<td align="left">3.054e-03</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>runtime_model = lm(average_rating ~ runtime, data = movie_df)
+appearances_model = lm(average_rating ~ list_appearances, data = movie_df)
+watches_model = lm(average_rating ~ watches, data = movie_df)
+fans_model = lm(average_rating ~ fans, data = movie_df) 
+runtime_adj_model = lm(
+  average_rating ~ runtime + watches + list_appearances + fans,
+  data = movie_df
+)
+
+r2_table = tibble(
+ r2_model = c(&quot;Runtime&quot;, &quot;Appearances in User-Curated Lists&quot;, &quot;Watches&quot;, &quot;Fans&quot;, &quot;Runtime (adjusted)&quot;),
+r2 = c(summary(runtime_model)$r.squared,
+summary(appearances_model)$r.squared,
+summary(watches_model)$r.squared,
+summary(fans_model)$r.squared,
+summary(runtime_adj_model)$r.squared
+))
+
+knitr::kable(r2_table, digits = 4)</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">r2_model</th>
+<th align="right">r2</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Runtime</td>
+<td align="right">0.0324</td>
+</tr>
+<tr class="even">
+<td align="left">Appearances in User-Curated Lists</td>
+<td align="right">0.1505</td>
+</tr>
+<tr class="odd">
+<td align="left">Watches</td>
+<td align="right">0.0829</td>
+</tr>
+<tr class="even">
+<td align="left">Fans</td>
+<td align="right">0.0683</td>
+</tr>
+<tr class="odd">
+<td align="left">Runtime (adjusted)</td>
+<td align="right">0.1906</td>
+</tr>
+</tbody>
+</table>
 <p>Finally, incorporating multiple predictors into an adjusted model
 resulted in improved model performance, with the adjusted runtime model
 explaining approximately 19% of the variance in average ratings, the
-strongest result among all models evaluated. Cross-validation further
-supported this conclusion, as the covariate-adjusted runtime model
-yielded the lowest RMSE. This indicated the highest predictive accuracy.
-Altogether, while <code>runtime</code> alone is a weak predictor of
-perceived movie quality, audience engagement metrics, particularly
-curated list appearances, emerge as more powerful indicators of how
-viewers rate the movie.</p>
+strongest result among all models evaluated.</p>
+<pre class="r"><code>cv2_df = 
+  crossv_mc(movie_df, 100)
+
+cv2_df = cv2_df %&gt;% 
+  mutate(
+    appearances_mod = map(.x = train, ~lm(average_rating ~ list_appearances, data = .x)),
+    watches_mod = map(.x = train, ~lm(average_rating ~ watches, data = .x)),
+    fans_mod = map(.x = train, ~lm(average_rating ~ fans, data = .x)),
+    runtime_mod = map(.x = train, ~lm(average_rating ~ runtime, data = .x)),
+    runtime_adj_mod = map(.x = train, ~lm(
+  average_rating ~ runtime + watches + list_appearances + fans,
+  data = .x))
+    ) |&gt; 
+
+  mutate(
+    rmse_appearances = map2_dbl(.x = appearances_mod, .y = test, ~rmse(model = .x, data = .y)), 
+    rmse_watches = map2_dbl(.x = watches_mod, .y = test, ~rmse(model = .x, data = .y)), 
+    rmse_fans = map2_dbl(.x = fans_mod, .y = test, ~rmse(model = .x, data = .y)),
+    rmse_runtime = map2_dbl(.x = runtime_mod, .y = test, ~rmse(model = .x, data = .y)),
+    rmse_runtime_adj = map2_dbl(.x = runtime_adj_mod, .y = test, ~rmse(model = .x, data = .y))
+  )
+
+cv2_df |&gt; 
+  select(starts_with(&quot;rmse&quot;)) |&gt; 
+  pivot_longer(
+    everything(),
+    names_to = &quot;model&quot;, 
+    values_to = &quot;rmse&quot;,
+    names_prefix = &quot;rmse_&quot;) |&gt; 
+  mutate(model = fct_inorder(model)) |&gt; 
+  ggplot(aes(x = model, y = rmse)) + geom_violin() +
+  labs(
+    x = &quot;Model&quot;,
+    y = &quot;RMSE&quot;,
+    title = &quot;Root Mean Squared Errors Distributions for Average Rating&quot;
+  )</code></pre>
+<p><img src="report_files/figure-html/unnamed-chunk-5-1.png" width="90%" /></p>
+<p>Cross-validation further supported this conclusion, as the
+covariate-adjusted runtime model yielded the lowest RMSE. This indicated
+the highest predictive accuracy. Altogether, while <code>runtime</code>
+alone is a weak predictor of perceived movie quality, audience
+engagement metrics, particularly curated list appearances, emerge as
+more powerful indicators of how viewers rate the movie.</p>
 </div>
 <div id="discussion" class="section level3">
 <h3>Discussion</h3>

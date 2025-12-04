@@ -1,0 +1,27 @@
+---
+title: "Meet the Team"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    code_folding: hide
+---
+
+
+Welcome to our project! Meet the team who put this together.
+
+**Name**
+
+<img src="insertpicofyourfavmoviecharacter.jpg" style="width:25%">
+MPH - dept 
+
+favorite movie
+
+
+^copy paste this template
+
+**Amanda Sy**
+
+<img src="insertpicofyourfavmoviecharacter.jpg" style="width:25%">
+
+Amanda is a second-year MPH student in the Population & Family Health department with a certificate in Public Health Research Methods. Her favorite movie is *Fantastic Mr. Fox*.

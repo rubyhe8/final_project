@@ -11,9 +11,8 @@ output:
 # Load libraries
 library(tidyverse)
 library(plotly)
-```
+library(patchwork)
 
-```{r include = FALSE}
 # Preset settings
 
 knitr::opts_chunk$set(
@@ -31,9 +30,7 @@ options(
 
 scale_colour_discrete = scale_colour_viridis_d
 scale_fill_discrete = scale_fill_viridis_d
-```
 
-```{r include = FALSE}
 # Import and clean movie dataset
 movie_df = read.csv("data/letterbox_movie_classification_dataset.csv") |>
   janitor::clean_names() |>
@@ -91,6 +88,7 @@ genre_df =
   separate_rows(genres, sep = ",\\s*")
 
 #summarize genre variable and only show top 18 genres
+
 genre_clean_df = 
   genre_df |> 
   group_by(genres) |> 
@@ -100,9 +98,6 @@ genre_clean_df =
   arrange(desc(n)) |> 
   filter(genres %in% c("Action", "Adventure", "Animation", "Comedy", "Crime", "Documentary", "Drama", "Thriller", "Horror", "Romance", "Science Fiction", "Fantasy", "Mystery", "Family", "History", "Music", "War", "Western")) 
 
-```
-
-```{r}
 genre_clean_df |> 
   mutate(
     genres = fct_reorder(genres, -n)
@@ -119,7 +114,6 @@ genre_clean_df |>
 ```
 
 Based on the bar chart, drama, comedy, and thrillers are the top 3 film genres. Music, war, and western movies are less common. 
-
 
 ### Watches, Fans, Likes, and List Appearance
 
@@ -165,7 +159,6 @@ subplot(watches_plot, fans_plot, likes_plot, list_plot, nrows = 4) |>
     yaxis3 = list(title = "Count"),
     yaxis4 = list(title = "Count")
   )
-
 ```
 
 The histograms show that number of watches, fans, likes, and list appearances all a follow heavily right skewed distribution, with most movies centered near the lower end of the scale. Due to the skewdness of these variables, it may be relevant to transform or categorize these variables before conducting further analyses. 
@@ -173,8 +166,7 @@ The histograms show that number of watches, fans, likes, and list appearances al
 ## Bivariate Exploratory Analysis
 
 ### Continuous runtime vs average_rating
-
-```{r}
+```{r, message = FALSE}
 movie_df |> 
 ggplot(aes(x = log(runtime), y = average_rating)) +
   geom_point(alpha = 0.5) +
@@ -236,7 +228,7 @@ runtime_rate_alt2_df |>
 
 ### Watches, Fans, Likes, and List appearances vs Average Ratings
 
-```{r}
+```{r, message = FALSE, warning = FALSE}
 movie_df |> 
   select(film_title, watches, likes, fans, list_appearances, average_rating) |> 
   pivot_longer(
@@ -282,6 +274,8 @@ genre_df |>
 
 ## Top Films
 
+### Top watched films 
+
 ```{r}
 #create function for top film
 
@@ -297,11 +291,7 @@ top_film = function(df, variable) {
   table
   
 }
-```
 
-### Top watched films 
-
-```{r}
 top_film(movie_df, watches)
 ```
 

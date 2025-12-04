@@ -1,16 +1,22 @@
-name: "Yay internet!"
+name: "Menu"
 output_dir: "."
 navbar:
   title: "Home"
   right:
     - text: "About"
-      href: about.html
+      menu:
+        - text: "Data Cleaning"
+          href: "Data-Cleaning.html"
+        - text: "Proposal"
+          href: "proposal.html"
+        - text: "Meet the Team"
+          href: "team.html" 
     - text: "Exploratory Data Analysis"
       href: eda.html
-    - text: "Model Building"
-      href: model.html 
     - text: "Regression Analysis"
       href: regression.html
+    - text: "Model Building"
+      href: model.html 
     - text: "Report"
       href: report.html
     - icon: fa-envelope fa-lg
