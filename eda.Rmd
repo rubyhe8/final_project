@@ -40,9 +40,9 @@ movie_df = read.csv("data/letterbox_movie_classification_dataset.csv") |>
 
 ## Univariate Exploratory Analysis
 
-### Average Rating
+To better understand our dataset, we are first going to explore the distributions for each variable of interest: average rating, runtime, genre, watches, fans, likes, and list appearances.
 
-We are interested in looking at a films' average rating as an outcome variable. We will take a look at its distribution using a histogram. 
+### Average Rating
 
 ```{r}
 movie_df |> 
@@ -50,17 +50,15 @@ movie_df |>
           type = "histogram", colors = "viridis"
   ) |> 
   layout(
-    title = "Distribution of Movies' Average Rating",
+    title = "Distribution of Average Rating",
     xaxis = list(title = "Average Rating"),
     yaxis = list(title = "Count")
   )
 ```
 
-The histogram representing movie average ratings follows a normal distribution, centered at around 3.25. 
+We are interested in looking at a film's average rating as an outcome variable. The histogram representing movie average ratings follows a normal distribution, centered at around 3.25. 
 
 ### Runtime
-
-We will explore predictors possibly associated with average ratings, starting with film run time. The distribution of films' runtime is shown using a histogram below. 
 
 ```{r}
 movie_df |> 
@@ -68,17 +66,15 @@ movie_df |>
           type = "histogram", colors = "viridis"
   ) |> 
   layout(
-    title = "Distribution of Movie Runtimes",
+    title = "Distribution of Runtimes",
     xaxis = list(title = "Runtime (minutes)"),
     yaxis = list(title = "Count")
   )
 ```
 
-The histogram representing movie runtimes follows a relatively normal distribution, with a slight right skew, centered at around 125 minutes. 
+We will explore predictors possibly associated with average ratings, starting with film's runtime in minutes. The histogram follows a right skewed distribution, with the tail extending beyond 600 minutes. While the distribution is predominantly centered at around 100 minutes, there is also a spike of films that have runtimes under 20 minutes. 
 
 ### Genre
-
-Next, we will explore the distribution of film genres. We created bar chart representing the top 18 film genres that movies are associated with. 
 
 ```{r}
 #clean genre variable
@@ -106,19 +102,15 @@ genre_clean_df |>
           showlegend = FALSE
   ) |> 
   layout(
-    title = "Distribution of Movie Genres",
+    title = "Distribution of Genres",
     xaxis = list(title = "Genres"),
     yaxis = list(title = "Count")
   )
 ```
 
-Based on the bar chart, drama, comedy, and thrillers are the top 3 film genres. Music, war, and western movies are less common. 
+A bar chart was created to show the top 18 film genres represented in the dataset. We can see that drama, comedy, and thriller are the most common genres, with 3346 films classified as dramas, 2620 classified as comedy, and 1940 films classified as thriller. Since movies can be labeled as more than one genre, a  movie can contribute to multiple categories. 
 
 ### Popularity Metrics
-
-We are also interested in exploring a film's popularity metrics, which includes the number of watches, fans, likes, and list appearances.
-
-*Note*: Due to the extreme skewdness of the distributions, the plots are zoomed in to better visualize the distribution where most values lie. Users can zoom out to better understand the nature of the skewedness. 
 
 ```{r}
 #create function to create plots for each variable
@@ -174,7 +166,9 @@ subplot(watches_plot, fans_plot, likes_plot, list_plot, nrows = 4) |>
   )
 ```
 
-The histograms show that number of watches, fans, likes, and list appearances all a follow heavily right skewed distribution, with most movies centered near the lower end of the scale. Due to the skewdness of these variables, it may be relevant to transform or categorize these variables before conducting further analyses. 
+We are also interested in exploring a film's popularity metrics, which includes the number of watches, fans, likes, and list appearances. The histograms show that number of watches, fans, likes, and list appearances all follow a heavily right skewed distribution, with most movies centered near the lower end of the scale. Due to the skewdness of these variables, it may be relevant to transform or categorize these variables before conducting further analyses. 
+
+*Note*: Due to the extreme skewdness of the distributions, the plots are zoomed in to better visualize the distribution where most values lie. Users can zoom out to better understand the nature of the skewedness. 
 
 ## Correlation Matrix
 
@@ -189,12 +183,14 @@ cor_matrix =
 
 plot_ly(
   z = cor_matrix, x = colnames(cor_matrix), y = colnames(cor_matrix),
-  type = "heatmap", colors = "RdBu", reversescale = TRUE
+  type = "heatmap", colors = "Reds"
   ) |> 
   layout(
     title = "Heat Map of Correlation Matrix"
   )
 ```
+
+A heatmap representing the correlation matrix was created to better illustrate the correlation between our possible predictors and assess multicollinearity. Darker red represents a strong relationship between the pair of variables, while the lighter color represent a weaker relationship. Since the scale in the heat map demonstrates that correlatation coefficients are above, this means that all pairs of variables resemble a positive relationship. There appears to be a high collinearity between likes and watches. 
 
 ## Bivariate Exploratory Analysis
 
@@ -312,13 +308,13 @@ top_film = function(df, variable) {
 top_film(movie_df, average_rating)
 ```
 
-### Films with most watches
+### Top Watched Films
 
 ```{r}
 top_film(movie_df, watches)
 ```
 
-### Films with most list appearances
+### Top Films by List appearances
 
 ```{r}
 top_film(movie_df, list_appearances)
