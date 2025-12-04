@@ -11,15 +11,14 @@ output:
 # Load libraries
 library(tidyverse)
 library(plotly)
-library(patchwork)
 ```
 
 ```{r include = FALSE}
 # Preset settings
 
 knitr::opts_chunk$set(
-  fig.width = 8,
-  fig.asp = .8,
+  fig.width = 6,
+  fig.asp = .6,
   out.width = "90%"
 )
 
@@ -82,15 +81,16 @@ The histogram representing movie runtimes follows a relatively normal distributi
 
 ### Genre
 
+Next, we will explore the distribution of film genres. We created bar chart representing the top 18 film genres that movies are associated with. 
+
 ```{r}
+#clean genre variable
 genre_df = 
   movie_df |>
   mutate(genres = str_remove_all(genres, "\\[|\\]|'")) |>
   separate_rows(genres, sep = ",\\s*")
-```
 
-```{r}
-# Clean genre 
+#summarize genre variable and only show top 18 genres
 genre_clean_df = 
   genre_df |> 
   group_by(genres) |> 
@@ -98,7 +98,8 @@ genre_clean_df =
     n = n()
   ) |> 
   arrange(desc(n)) |> 
-  filter(n > 16)
+  filter(genres %in% c("Action", "Adventure", "Animation", "Comedy", "Crime", "Documentary", "Drama", "Thriller", "Horror", "Romance", "Science Fiction", "Fantasy", "Mystery", "Family", "History", "Music", "War", "Western")) 
+
 ```
 
 ```{r}
@@ -106,8 +107,9 @@ genre_clean_df |>
   mutate(
     genres = fct_reorder(genres, -n)
   ) |> 
-  plot_ly(x = ~genres, y = ~n,
-          type = "bar", colors = "viridis"
+  plot_ly(x = ~genres, y = ~n, color = ~genres,
+          type = "bar", colors = "viridis",
+          showlegend = FALSE
   ) |> 
   layout(
     title = "Distribution of Movie Genres",
@@ -116,10 +118,7 @@ genre_clean_df |>
   )
 ```
 
-
-- number of movies per genre
-- bar/col
-Removed Unknown and genres with n <= 2
+Based on the bar chart, drama, comedy, and thrillers are the top 3 film genres. Music, war, and western movies are less common. 
 
 
 ### Watches, Fans, Likes, and List Appearance
@@ -127,72 +126,49 @@ Removed Unknown and genres with n <= 2
 We are also interested in exploring a film's number of watches, fans, likes, and list appearances and use them as potential predictors of average rating. 
 
 ```{r}
-#Number of watches
+#create function to create plots for each variable
+films_plot = function(df, xvar) {
+  
+    plot = 
+      df |> 
+      plot_ly(x = df[[xvar]],
+              type = "histogram" , colors = "viridis",
+              name = xvar
+      ) 
+
+  plot
+  
+}
+
+#Plot for number of watches
 watches_plot = 
-  movie_df |> 
-  plot_ly(x = ~watches,
-          type = "histogram", colors = "viridis"
-  ) |> 
-  layout(
-    title = "Distribution of Watches",
-    xaxis = list(title = "Number of Watches"),
-    yaxis = list(title = "Count")
-  )
-```
+  films_plot(movie_df, "watches")
 
-
-```{r}
-#Number of Fans
-
+#Plot for nans
 fans_plot = 
-  movie_df |> 
-    plot_ly(x = ~fans,
-          type = "histogram", colors = "viridis"
-  ) |> 
-  layout(
-    title = "Distribution of Fans",
-    xaxis = list(title = "Number of Fans"),
-    yaxis = list(title = "Count")
-  )
-```
+  films_plot(movie_df, "fans")
 
-
-```{r}
-#Number of likes
+#Plot for number of likes
 likes_plot = 
-  movie_df |> 
-    plot_ly(x = ~likes,
-          type = "histogram", colors = "viridis"
-  ) |> 
-  layout(
-    title = "Distribution of Likes",
-    xaxis = list(title = "Number of Likes"),
-    yaxis = list(title = "Count")
-  )
-```
+  films_plot(movie_df, "likes")
 
 
-```{r}
-#Number of List Appearances
-
+#Plot for number of List Appearances
 list_plot = 
-  movie_df |> 
-    plot_ly(x = ~list_appearances,
-          type = "histogram", colors = "viridis"
-  ) |> 
-  layout(
-    title = "Distribution of List Appearances",
-    xaxis = list(title = "Number of List Appearances"),
-    yaxis = list(title = "Count")
-  )
-```
+  films_plot(movie_df, "list_appearances")
 
-```{r}
-subplot(watches_plot, fans_plot, likes_plot, list_plot, nrows = 4)
+#Combine plots
+subplot(watches_plot, fans_plot, likes_plot, list_plot, nrows = 4) |> 
+  layout(
+    yaxis = list(title = "Count"),
+    yaxis2 = list(title = "Count"),
+    yaxis3 = list(title = "Count"),
+    yaxis4 = list(title = "Count")
+  )
+
 ```
 
 The histograms show that number of watches, fans, likes, and list appearances all a follow heavily right skewed distribution, with most movies centered near the lower end of the scale. Due to the skewdness of these variables, it may be relevant to transform or categorize these variables before conducting further analyses. 
-
 
 ## Bivariate Exploratory Analysis
 
@@ -200,9 +176,9 @@ The histograms show that number of watches, fans, likes, and list appearances al
 
 ```{r}
 movie_df |> 
-ggplot(aes(x = runtime, y = average_rating)) +
+ggplot(aes(x = log(runtime), y = average_rating)) +
   geom_point(alpha = 0.5) +
-  geom_smooth() +
+  geom_smooth(se = FALSE) +
   labs (title = "Relationship between Runtime and Average Rating",
         x = "Runtime (minutes)", y = "Average Rating")
 ```
@@ -258,86 +234,50 @@ runtime_rate_alt2_df |>
 
 ```
 
-### Total ratings vs Average Rating
+### Watches, Fans, Likes, and List appearances vs Average Ratings
 
 ```{r}
-total_avg_rating = 
-  movie_df |> 
-  ggplot(aes(x = log(total_ratings), y = average_rating)) +
-  geom_point(alpha = 0.5) +
-  geom_smooth() +
-  labs(title = "Relationship between Total Ratings and Average Rating",
-        x = "Total Ratings", y = "Average Rating")
-```
-
-### Watches, fans, likes, and list appearances vs Average Ratings
-
-```{r}
-#watches vs average rating
-watches_avg_rating = 
-  movie_df |> 
-  ggplot(aes(x = log(watches), y = average_rating)) +
-  geom_point(alpha = 0.5) +
-  geom_smooth() +
-  labs (title = "Relationship between Total Ratings and Average Rating",
-        x = "Total Ratings", y = "Average Rating")
-```
-
-```{r}
-#fans vs average rating
-fans_avg_rating = 
-  movie_df |> 
-  ggplot(aes(x = log(fans), y = average_rating)) +
-  geom_point(alpha = 0.5) +
-  geom_smooth() +
-  labs (title = "Relationship between Fans and Average Rating",
-        x = "Fans", y = "Average Rating")
-```
-
-```{r}
-# likes vs average rating
-likes_avg_rating = 
-  movie_df |> 
-  ggplot(aes(x = log(likes), y = average_rating)) +
-  geom_point(alpha = 0.5) +
-  geom_smooth() +
-  labs(title = "Relationship between Likes and Average Rating",
-        x = "Likes", y = "Average Rating")
-```
-
-```{r}
-# list appearances vs average rating
-list_avg_rating = 
-  movie_df |> 
-  ggplot(aes(x = log(list_appearances), y = average_rating)) +
-  geom_point(alpha = 0.5) +
-  geom_smooth() +
-  labs(title = "Relationship between Likes and Average Rating",
-        x = "Likes", y = "Average Rating")
-```
-
-```{r}
-(watches_avg_rating + fans_avg_rating )/ (likes_avg_rating + list_avg_rating)
-```
-
-
-### Average rating per genre
-
-```{r}
-genre_rating = 
-  genre_df |> 
-  group_by(genres) |> 
-  summarize(
-    avg_rating = mean(average_rating)
+movie_df |> 
+  select(film_title, watches, likes, fans, list_appearances, average_rating) |> 
+  pivot_longer(
+    cols = watches:list_appearances,
+    names_to = "metric",
+    values_to = "value"
   ) |> 
-  filter(genres %in% c("Action", "Adventure", "Animation", "Comedy", "Crime", "Documentary", "Drama", "Thriller", "Horror", "Romance", "Science Fiction", "Fantasy", "Mystery", "Family", "History", "Music", "War", "Western", "TV Movie")) 
+  select(film_title, metric, value, average_rating) |> 
+  mutate(
+    metric = case_match(
+      metric,
+      "watches" ~ "Watches",
+      "likes" ~ "Likes",
+      "fans" ~ "Fans",
+      "list_appearances" ~ "List Appearances"
+    )
+  ) |> 
+  ggplot(aes(x = log(value), y = average_rating)) +
+  geom_point(aes(color = metric), alpha = 0.5) +
+  geom_smooth(se = FALSE) +
+  facet_wrap(vars(metric), nrow = 2) +
+  labs(
+    x = "log(Value of Metric)",
+    y = "Average Rating",
+    title = "Popularity Metrics vs Average Rating"
+  )
+```
 
+### Average Rating per Genre
+
+```{r}
 genre_df |> 
-  filter(genres %in% c("Action", "Adventure", "Animation", "Comedy", "Crime", "Documentary", "Drama", "Thriller", "Horror", "Romance", "Science Fiction", "Fantasy", "Mystery", "Family", "History", "Music", "War", "Western", "TV Movie")) |> 
-  ggplot(aes(x = genres, y = average_rating)) +
-  geom_boxplot()
-
-
+  filter(genres %in% c("Action", "Adventure", "Animation", "Comedy", "Crime", "Documentary", "Drama", "Thriller", "Horror", "Romance", "Science Fiction", "Fantasy", "Mystery", "Family", "History", "Music", "War", "Western")) |> 
+  mutate(
+    genres = fct_reorder(genres, average_rating, .fun = median)
+  ) |> 
+  plot_ly(
+    x = ~genres, y = ~average_rating, color = ~genres,
+    type = "box", colors = "viridis",
+    showlegend = FALSE
+  )
 ```
 
 ## Top Films
@@ -388,3 +328,19 @@ top_film(movie_df, likes)
 ```{r}
 top_film(movie_df, list_appearances)
 ```
+
+Bar plots instead???
+
+```{r}
+movie_df |> 
+  select(film_title, director, watches, likes, fans, list_appearances, average_rating) |> 
+  pivot_longer(
+    cols = watches:list_appearances,
+    names_to = "metric",
+    values_to = "value"
+  ) |> 
+  select(film_title, director, metric, value, average_rating) |> view()
+```
+
+
+
