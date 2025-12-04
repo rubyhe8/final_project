@@ -88,7 +88,6 @@ genre_df =
   separate_rows(genres, sep = ",\\s*")
 
 #summarize genre variable and only show top 18 genres
-
 genre_clean_df = 
   genre_df |> 
   group_by(genres) |> 
@@ -115,9 +114,11 @@ genre_clean_df |>
 
 Based on the bar chart, drama, comedy, and thrillers are the top 3 film genres. Music, war, and western movies are less common. 
 
-### Watches, Fans, Likes, and List Appearance
+### Popularity Metrics
 
-We are also interested in exploring a film's number of watches, fans, likes, and list appearances and use them as potential predictors of average rating. 
+We are also interested in exploring a film's popularity metrics, which includes the number of watches, fans, likes, and list appearances.
+
+*Note*: Due to the extreme skewdness of the distributions, the plots are zoomed in to better visualize the distribution where most values lie. Users can zoom out to better understand the nature of the skewedness. 
 
 ```{r}
 #create function to create plots for each variable
@@ -136,20 +137,32 @@ films_plot = function(df, xvar) {
 
 #Plot for number of watches
 watches_plot = 
-  films_plot(movie_df, "watches")
+  films_plot(movie_df, "watches") |> 
+  layout(
+    xaxis = list(range = c(0, 1000000))
+  )
 
 #Plot for nans
 fans_plot = 
-  films_plot(movie_df, "fans")
+  films_plot(movie_df, "fans") |> 
+  layout(
+    xaxis = list(range = c(0, 50000))
+  )
 
 #Plot for number of likes
 likes_plot = 
-  films_plot(movie_df, "likes")
+  films_plot(movie_df, "likes") |> 
+  layout(
+    xaxis = list(range = c(0, 500000))
+  )
 
 
 #Plot for number of List Appearances
 list_plot = 
-  films_plot(movie_df, "list_appearances")
+  films_plot(movie_df, "list_appearances") |> 
+  layout(
+    xaxis = list(range = c(0, 200000))
+  )
 
 #Combine plots
 subplot(watches_plot, fans_plot, likes_plot, list_plot, nrows = 4) |> 
@@ -163,70 +176,71 @@ subplot(watches_plot, fans_plot, likes_plot, list_plot, nrows = 4) |>
 
 The histograms show that number of watches, fans, likes, and list appearances all a follow heavily right skewed distribution, with most movies centered near the lower end of the scale. Due to the skewdness of these variables, it may be relevant to transform or categorize these variables before conducting further analyses. 
 
-## Bivariate Exploratory Analysis
-
-### Continuous runtime vs average_rating
-```{r, message = FALSE}
-movie_df |> 
-ggplot(aes(x = log(runtime), y = average_rating)) +
-  geom_point(alpha = 0.5) +
-  geom_smooth(se = FALSE) +
-  labs (title = "Relationship between Runtime and Average Rating",
-        x = "Runtime (minutes)", y = "Average Rating")
-```
-
-### Categorical runtime vs average_rating
-
-Boxplot
+## Correlation Matrix
 
 ```{r}
-runtime_rate_df =
-  movie_df |>
-  mutate(runtime_category = case_when(
-    runtime <= 90 ~ "Short",
-    runtime > 90 & runtime <= 120 ~ "Medium",
-    runtime > 120 ~ "Long"
-  ))
+vars = 
+  movie_df |> 
+  select(runtime, watches, likes, fans, list_appearances)
 
-runtime_rate_df |>
-  group_by(runtime_category) |>
-  summarise(avg_rating = mean(average_rating, na.rm = TRUE)) |>
-  arrange(desc(avg_rating))
+cor_matrix =
+  cor(vars, use = "complete.obs") |> 
+  round(2)
 
-runtime_rate_df |> 
-  ggplot(aes(x = runtime_category, y = average_rating)) +
-  geom_boxplot()
-
-
-runtime_rate_df |>
-  group_by(runtime_category) |>
-  summarize(
-    n = n()
+plot_ly(
+  z = cor_matrix, x = colnames(cor_matrix), y = colnames(cor_matrix),
+  type = "heatmap", colors = "RdBu", reversescale = TRUE
+  ) |> 
+  layout(
+    title = "Heat Map of Correlation Matrix"
   )
+```
 
- 
+## Bivariate Exploratory Analysis
 
-runtime_rate_alt2_df = 
+### Runtime vs Average Rating
+
+```{r, message = FALSE}
+#continuous runtime
+cont_runtime_rating_plot = 
+  movie_df |> 
+  ggplot(aes(x = log(runtime), y = average_rating)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(se = FALSE) +
+  labs (title = "Continuous Runtime\n vs Average Rating",
+          x = "Runtime (minutes)", y = "Average Rating")
+
+#categorical runtime
+runtime_cat_df = 
   movie_df |>
   mutate(runtime_category = case_when(
-    runtime <= 100 ~ "Short",
-    runtime > 100 ~ "Long"
+    runtime < 100 ~ "Short",
+    runtime >= 100 ~ "Long"
   ))
 
-runtime_rate_alt2_df |> 
+cat_runtime_rating_plot = 
+runtime_cat_df |> 
   ggplot(aes(x = runtime_category, y = average_rating)) +
-  geom_boxplot()
-  
-runtime_rate_alt2_df |>
+  geom_boxplot() +
+  labs (title = "Categorical Runtime\n vs Average Rating",
+          x = "Runtime Group", y = "Average Rating")
+
+#patchwork
+cont_runtime_rating_plot + cat_runtime_rating_plot
+```
+
+```{r}
+#table with sample size
+runtime_cat_df |>
   group_by(runtime_category) |>
   summarize(
     n = n()
   ) |>
-  arrange(desc(n))
-
+  arrange(desc(n)) |> 
+  knitr::kable()
 ```
 
-### Watches, Fans, Likes, and List appearances vs Average Ratings
+### Popularity Metrics vs Average Ratings
 
 ```{r, message = FALSE, warning = FALSE}
 movie_df |> 
@@ -257,6 +271,8 @@ movie_df |>
   )
 ```
 
+Popularity metrics includes number of watches, fans, likes, and list appearances.
+
 ### Average Rating per Genre
 
 ```{r}
@@ -272,13 +288,14 @@ genre_df |>
   )
 ```
 
-## Top Films
+## Outliers
 
-### Top watched films 
+Distributions for many variables in our dataset are skewed to the right. To explore the outliers in the dataset, we will create tables of top films based on average rating, list_appearances, and fans. 
+
+### Top Rated Films 
 
 ```{r}
 #create function for top film
-
 top_film = function(df, variable) {
   
   table = 
@@ -292,25 +309,13 @@ top_film = function(df, variable) {
   
 }
 
-top_film(movie_df, watches)
-```
-
-### Top rated films 
-
-```{r}
 top_film(movie_df, average_rating)
 ```
 
-### Films with most fans
+### Films with most watches
 
 ```{r}
-top_film(movie_df, fans)
-```
-
-### Films with most likes
-
-```{r}
-top_film(movie_df, likes)
+top_film(movie_df, watches)
 ```
 
 ### Films with most list appearances
@@ -318,19 +323,5 @@ top_film(movie_df, likes)
 ```{r}
 top_film(movie_df, list_appearances)
 ```
-
-Bar plots instead???
-
-```{r}
-movie_df |> 
-  select(film_title, director, watches, likes, fans, list_appearances, average_rating) |> 
-  pivot_longer(
-    cols = watches:list_appearances,
-    names_to = "metric",
-    values_to = "value"
-  ) |> 
-  select(film_title, director, metric, value, average_rating) |> view()
-```
-
 
 
