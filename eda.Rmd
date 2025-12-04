@@ -306,12 +306,13 @@ genre_rating =
 genre_df |> 
   filter(genres %in% c("Action", "Adventure", "Animation", "Comedy", "Crime", "Documentary", "Drama", "Thriller", "Horror", "Romance", "Science Fiction", "Fantasy", "Mystery", "Family", "History", "Music", "War", "Western", "TV Movie")) |> 
   ggplot(aes(x = genres, y = average_rating)) +
-  geom_boxplot()
-
-
+  geom_boxplot() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
 ```
 
 ## Top Films
+
+### Top watched films 
 
 ```{r}
 #create function for top film
@@ -328,11 +329,7 @@ top_film = function(df, variable) {
   table
   
 }
-```
 
-### Top watched films 
-
-```{r}
 top_film(movie_df, watches)
 ```
 
