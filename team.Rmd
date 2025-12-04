@@ -25,3 +25,10 @@ favorite movie
 <img src="insertpicofyourfavmoviecharacter.jpg" style="width:25%">
 
 Amanda is a second-year MPH student in the Population & Family Health department with a certificate in Public Health Research Methods. Her favorite movie is *Fantastic Mr. Fox*.
+
+**Kallan Roan**
+
+<img src="images/minion.jpg" style="width:25%">
+
+Kallan is a second-year MPH student in the Epidemiology Department with a certificate in Applied Biostatistics and Public Health Data Science. Her favorite movie is *Despicable Me*.
+
