@@ -17,9 +17,19 @@ Through our analysis, we are trying to understand what factors contribute to hig
 
 Unfortunately this idea met some challenges. Despite our dataset being robust, variables like genre, studio, and director had multiple entries for each movie and we ran into challenges separating them, and most importantly conducting regression analysis on it. With this in mind, we decided to shift our research question to look more at how certain continuous variables contribute to average rating. 
 
-As we did this, we explored how each variable individually was associated with average rating, and shifted our question and curiousity to if these variables together can come together to create a prediction model that is able to accurately estimate the rating of a film based on factors like movie run time, number of watches, the number of times it appears on Letterboxd, and how many watchers identfy as fans of the film. 
+As we did this, we explored how each variable individually was associated with average rating, and shifted our question and curiousity to if these variables together can come together to create a prediction model that is able to accurately estimate the rating of a film based on factors like movie run time, number of watches, the number of times it appears on Letterboxd, and how many watchers identify as fans of the film. 
 
 ### Data
+
+The Letterboxd dataset was downloaded from Kaggle, an online data science community that provides free public datasets for solving real-world problems. The dataset was downloaded in CSV format and uploaded to a shared GitHUb repository. The original downloaded dataset contained metadeta for 10,002 movies with 16 column variables and was 'clean' in the sense that it had no missing values. However, for the purpose of our analysis, we filtered the dataset to include only English-language films. 
+
+During the data cleaning and preparation phase, we developed subsets of ready-to-use code from the main dataframe. This was done for two primary reasons:
+
+1. To provide code snippets that would facilitate and expedite the subsequent exploratory data analysis and regression.
+
+2. We anticipated potential issues with the nature of certain variables which could complicate their use as predictors in our regression model. 
+
+Hence, this data cleaning and preparation stage involved extensive experimentation with various variables to determine which ones could be effectively coded and would run properly. Additionally, code snippets that treated variables as either categorical or continuous were provided to enable immediate application in subsequent analyses. As mentioned earlier, we discovered that some variables such as genre, director and studio were more challenging to separate and restructure. While we managed to successfully separate genre, we struggled to establish an appropriate method for handling the director and studio variables. Therefore, we opted to tweak the focus of our research questions and exclude director and studio from our analyses. 
 
 ### Exploratory Analysis
 

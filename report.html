@@ -429,11 +429,40 @@ associated with average rating, and shifted our question and curiousity
 to if these variables together can come together to create a prediction
 model that is able to accurately estimate the rating of a film based on
 factors like movie run time, number of watches, the number of times it
-appears on Letterboxd, and how many watchers identfy as fans of the
+appears on Letterboxd, and how many watchers identify as fans of the
 film.</p>
 </div>
 <div id="data" class="section level3">
 <h3>Data</h3>
+<p>The Letterboxd dataset was downloaded from Kaggle, an online data
+science community that provides free public datasets for solving
+real-world problems. The dataset was downloaded in CSV format and
+uploaded to a shared GitHUb repository. The original downloaded dataset
+contained metadeta for 10,002 movies with 16 column variables and was
+‘clean’ in the sense that it had no missing values. However, for the
+purpose of our analysis, we filtered the dataset to include only
+English-language films.</p>
+<p>During the data cleaning and preparation phase, we developed subsets
+of ready-to-use code from the main dataframe. This was done for two
+primary reasons:</p>
+<ol style="list-style-type: decimal">
+<li><p>To provide code snippets that would facilitate and expedite the
+subsequent exploratory data analysis and regression</p></li>
+<li><p>We anticipated potential issues with the nature of certain
+variables which could complicate their use as predictors in our
+regression model.</p></li>
+</ol>
+<p>Hence, this data cleaning and preparation stage involved extensive
+experimentation with various variables to determine which ones could be
+effectively coded and would run properly. Additionally, code snippets
+that treated variables as either categorical or continuous were provided
+to enable immediate application in subsequent analyses. As mentioned
+earlier, we discovered that some variables such as genre, director and
+studio were more challenging to separate and restructure. While we
+managed to successfully separate genre, we struggled to establish an
+appropriate method for handling the director and studio variables.
+Therefore, we opted to tweak the focus of our research questions and
+exclude director and studio from our analyses.</p>
 </div>
 <div id="exploratory-analysis" class="section level3">
 <h3>Exploratory Analysis</h3>
