@@ -284,9 +284,9 @@ genre_df |>
   )
 ```
 
-## Outliers
+## High-Performing Films
 
-Distributions for many variables in our dataset are skewed to the right. To explore the outliers in the dataset, we will create tables of top films based on average rating, list_appearances, and fans. 
+Distributions for many variables in our dataset are skewed to the right. To explore these films in the dataset, we will create tables of top films based on average rating, list_appearances, and fans. 
 
 ### Top Rated Films 
 
@@ -314,7 +314,7 @@ top_film(movie_df, average_rating)
 top_film(movie_df, watches)
 ```
 
-### Top Films by List appearances
+### Top Films by List Appearances
 
 ```{r}
 top_film(movie_df, list_appearances)
