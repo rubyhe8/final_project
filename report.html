@@ -393,15 +393,14 @@ div.tocify {
 
 <div id="motivation" class="section level3">
 <h3>Motivation</h3>
-<p>We are a group of passionate movie enthusiasts who are eager to dive
-into the Letterboxd dataset to uncover fascinating insights about films.
-In an era dominated by short-form content and claims of shorter
-attention spans, we are curious to see if shorter movies tend to receive
-higher ratings. We also want to explore the secret formulas behind
-top-rated films: Do certain directors excel when they stick to a
-specific genre or keep their films under 90 minutes? Beyond that, we are
-excited to analyze trends in genre preferences and discover what kind of
-film would captivate audiences.</p>
+<p>This project was inspired by a shared love and passion for movies. In
+an era dominated by short-form content and claims of shorter attention
+spans, we are curious to see if shorter movies tend to receive higher
+ratings. We also want to explore the secret formulas behind top-rated
+films: Do certain directors excel when they stick to a specific genre or
+keep their films under 90 minutes? Beyond that, we are excited to
+analyze trends in genre preferences and discover what kind of film would
+captivate audiences.</p>
 </div>
 <div id="initial-questions" class="section level3">
 <h3>Initial Questions</h3>
@@ -469,6 +468,24 @@ exclude director and studio from our analyses.</p>
 </div>
 <div id="model-building" class="section level3">
 <h3>Model Building</h3>
+<p>After conducting regression analysis, we noticed that there seemed to
+be a non-linear association between our outcome and the predictors. To
+dive deeper and understand this better we decided to construct different
+models and compare them. We first used a lasso technique to see what
+would statistically be the predictors that should be used. It gave us
+<code>runtime</code>, <code>list_appearances</code>, <code>fans</code>,
+<code>lowest</code>, and <code>highest</code>. This aligns with what we
+expected, and were mostly the covariates we used in our linear
+regression models. Despite this, we decided to create models using
+<code>runtime</code>, <code>list_appearances</code>, <code>fans</code>,
+and <code>watches</code>.</p>
+<p>We calculated room mean squared errors for 5 types of models: linear,
+smooth, log-level, generalized linear model, and log-log. We can see
+that linear and GLM models have the highest RMSEs, which is as expected
+since our regression analysis indicated to us that there is a non-linear
+relationship between our outcome and predictors. Using some sort of a
+log scale would work best to model this association as both the
+log-level and log-log models had comparably low RMSEs.</p>
 </div>
 <div id="additional-analysis-linear-models" class="section level3">
 <h3>Additional Analysis: Linear Models</h3>

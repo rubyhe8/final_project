@@ -9,7 +9,7 @@ output:
 
 ### Motivation
 
-We are a group of passionate movie enthusiasts who are eager to dive into the Letterboxd dataset to uncover fascinating insights about films. In an era dominated by short-form content and claims of shorter attention spans, we are curious to see if shorter movies tend to receive higher ratings. We also want to explore the secret formulas behind top-rated films: Do certain directors excel when they stick to a specific genre or keep their films under 90 minutes? Beyond that, we are excited to analyze trends in genre preferences and discover what kind of film would captivate audiences.
+This project was inspired by a shared love and passion for movies. In an era dominated by short-form content and claims of shorter attention spans, we are curious to see if shorter movies tend to receive higher ratings. We also want to explore the secret formulas behind top-rated films: Do certain directors excel when they stick to a specific genre or keep their films under 90 minutes? Beyond that, we are excited to analyze trends in genre preferences and discover what kind of film would captivate audiences.
 
 ### Initial Questions
 
@@ -68,6 +68,11 @@ movie_df = read.csv("data/letterbox_movie_classification_dataset.csv") |>
 ```
 
 ### Model Building
+
+After conducting regression analysis, we noticed that there seemed to be a non-linear association between our outcome and the predictors. To dive deeper and understand this better we decided to construct different models and compare them. We first used a lasso technique to see what would statistically be the predictors that should be used. It gave us `runtime`, `list_appearances`, `fans`, `lowest`, and `highest`. This aligns with what we expected, and were mostly the covariates we used in our linear regression models. Despite this, we decided to create models using `runtime`, `list_appearances`, `fans`, and `watches`. 
+
+We calculated room mean squared errors for 5 types of models: linear, smooth, log-level, generalized linear model, and log-log. We can see that linear and GLM models have the highest RMSEs, which is as expected since our regression analysis indicated to us that there is a non-linear relationship between our outcome and predictors. Using some sort of a log scale would work best to model this association as both the log-level and log-log models had comparably low RMSEs. 
+
 
 ### Additional Analysis: Linear Models 
 

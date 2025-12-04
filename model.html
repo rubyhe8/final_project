@@ -419,11 +419,14 @@ model_movie_df = read.csv(&quot;data/letterbox_movie_classification_dataset.csv&
   janitor::clean_names() |&gt;
   filter(original_language == &quot;English&quot;) |&gt;
   select(average_rating, runtime, watches, list_appearances, likes, fans, lowest, medium, highest, total_ratings)</code></pre>
-<p>fit a <code>lasso</code> model using <code>glmnet</code></p>
+<p>To build off of our regression analysis, we were curious to see what
+is the secret recipe to highly rated films. We decided to first fit a
+<code>lasso</code> model using <code>glmnet</code> to give us an idea of
+what variables impact average rating the most.</p>
 <pre class="r"><code>x = model.matrix(average_rating ~ ., model_movie_df) [,-1]
-y = model_movie_df |&gt; pull(average_rating)</code></pre>
-<p><code>lambda</code></p>
-<pre class="r"><code>lambda = 10^(seq(-2, 2.75, 0.1))
+y = model_movie_df |&gt; pull(average_rating)
+
+lambda = 10^(seq(-2, 2.75, 0.1))
 
 lasso_fit = 
   glmnet(x, y, lambda = lambda)
@@ -437,17 +440,66 @@ lambda_opt = lasso_cv[[&quot;lambda.min&quot;]]
 lasso_fit_opt = glmnet(x, y, lambda = lambda_opt) 
 
 lasso_fit_opt |&gt; 
-  broom::tidy()</code></pre>
-<pre><code>## # A tibble: 6 × 5
-##   term              step     estimate lambda dev.ratio
-##   &lt;chr&gt;            &lt;dbl&gt;        &lt;dbl&gt;  &lt;dbl&gt;     &lt;dbl&gt;
-## 1 (Intercept)          1  2.99          0.01     0.327
-## 2 runtime              1  0.00150       0.01     0.327
-## 3 list_appearances     1  0.00000539    0.01     0.327
-## 4 fans                 1 -0.00000135    0.01     0.327
-## 5 lowest               1 -0.0000353     0.01     0.327
-## 6 highest              1 -0.000000477   0.01     0.327</code></pre>
-<p>Lasso model chooses the following predictors</p>
+  broom::tidy() |&gt; 
+  as.data.frame() |&gt; 
+  knitr::kable(digits = 3)</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">term</th>
+<th align="right">step</th>
+<th align="right">estimate</th>
+<th align="right">lambda</th>
+<th align="right">dev.ratio</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">(Intercept)</td>
+<td align="right">1</td>
+<td align="right">2.990</td>
+<td align="right">0.01</td>
+<td align="right">0.327</td>
+</tr>
+<tr class="even">
+<td align="left">runtime</td>
+<td align="right">1</td>
+<td align="right">0.002</td>
+<td align="right">0.01</td>
+<td align="right">0.327</td>
+</tr>
+<tr class="odd">
+<td align="left">list_appearances</td>
+<td align="right">1</td>
+<td align="right">0.000</td>
+<td align="right">0.01</td>
+<td align="right">0.327</td>
+</tr>
+<tr class="even">
+<td align="left">fans</td>
+<td align="right">1</td>
+<td align="right">0.000</td>
+<td align="right">0.01</td>
+<td align="right">0.327</td>
+</tr>
+<tr class="odd">
+<td align="left">lowest</td>
+<td align="right">1</td>
+<td align="right">0.000</td>
+<td align="right">0.01</td>
+<td align="right">0.327</td>
+</tr>
+<tr class="even">
+<td align="left">highest</td>
+<td align="right">1</td>
+<td align="right">0.000</td>
+<td align="right">0.01</td>
+<td align="right">0.327</td>
+</tr>
+</tbody>
+</table>
+<p>We can see that using <code>lasso</code>, the following predictors
+were chosen:</p>
 <ul>
 <li>runtime</li>
 <li>list appearances</li>
@@ -455,9 +507,10 @@ lasso_fit_opt |&gt;
 <li>lowest</li>
 <li>highest</li>
 </ul>
-<p>We would like to include total number of watches and exclude lowest
-and highest (number of lowest ratings and number of highest ratings) as
-this may be repeatitive with the rating variable.</p>
+<p>We would like to include total number of watches as well as we think
+movies that are watched more and exclude lowest and highest (number of
+lowest ratings and number of highest ratings) as this may be repetitive
+with the rating variable.</p>
 <p>Previously, in our regression analysis we saw that a linear model
 seems to not be the most effective in modeling the association between
 average rating and other variables such as runtime, list appearances,
@@ -479,14 +532,60 @@ model_movie_df |&gt;
     x = &quot;Predicted&quot;,
     y = &quot;Residuals&quot;
   )</code></pre>
-<p><img src="model_files/figure-html/unnamed-chunk-4-1.png" width="90%" /></p>
-<pre class="r"><code>linear_model |&gt; broom::glance()</code></pre>
-<pre><code>## # A tibble: 1 × 12
-##   r.squared adj.r.squared sigma statistic p.value    df logLik    AIC    BIC
-##       &lt;dbl&gt;         &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;
-## 1     0.191         0.190 0.471      475.       0     4 -5382. 10776. 10818.
-## # ℹ 3 more variables: deviance &lt;dbl&gt;, df.residual &lt;int&gt;, nobs &lt;int&gt;</code></pre>
-<p>The linear model has very high AIC/BIC values, and low R^2. The plot
+<p><img src="model_files/figure-html/unnamed-chunk-3-1.png" width="90%" /></p>
+<pre class="r"><code>linear_model |&gt; 
+  broom::glance() |&gt; 
+  as.data.frame() |&gt; 
+  knitr::kable(digits = 3)</code></pre>
+<table>
+<colgroup>
+<col width="9%" />
+<col width="13%" />
+<col width="5%" />
+<col width="9%" />
+<col width="7%" />
+<col width="2%" />
+<col width="9%" />
+<col width="8%" />
+<col width="8%" />
+<col width="8%" />
+<col width="11%" />
+<col width="4%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="right">r.squared</th>
+<th align="right">adj.r.squared</th>
+<th align="right">sigma</th>
+<th align="right">statistic</th>
+<th align="right">p.value</th>
+<th align="right">df</th>
+<th align="right">logLik</th>
+<th align="right">AIC</th>
+<th align="right">BIC</th>
+<th align="right">deviance</th>
+<th align="right">df.residual</th>
+<th align="right">nobs</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">0.191</td>
+<td align="right">0.19</td>
+<td align="right">0.471</td>
+<td align="right">475.125</td>
+<td align="right">0</td>
+<td align="right">4</td>
+<td align="right">-5381.935</td>
+<td align="right">10775.87</td>
+<td align="right">10817.85</td>
+<td align="right">1793.061</td>
+<td align="right">8069</td>
+<td align="right">8074</td>
+</tr>
+</tbody>
+</table>
+<p>The linear model has very high AIC/BIC values, and low R². The plot
 of residuals and predicted values also seems to be very skewed and not
 approximately evenly distributed around 0. Given this, if a linear model
 is not the most “optimal” model, what model should be used?</p>
@@ -534,10 +633,10 @@ cv_df |&gt;
   ggplot(aes(x = model, y = rmse)) + geom_violin() +
   labs(
     title = &quot;Root Mean Squared Error Distributions&quot;,
-    y = &quot;Model&quot;,
-    x = &quot;RMSE&quot;
+    y = &quot;RMSE&quot;,
+    x = &quot;Model&quot;
   )</code></pre>
-<p><img src="model_files/figure-html/unnamed-chunk-5-1.png" width="90%" /></p>
+<p><img src="model_files/figure-html/unnamed-chunk-4-1.png" width="90%" /></p>
 <p>When comparing a linear, smooth, log-level, log-log, and GLM model,
 we can see that the linear model has the highest RMSE, while the log-log
 and log_level model have the lowest RMSE.</p>
@@ -569,10 +668,64 @@ ggplot(combined_df, aes(pred, resid)) +
     x = &quot;Predicted&quot;,
     y = &quot;Residuals&quot;
   )</code></pre>
-<p><img src="model_files/figure-html/unnamed-chunk-6-1.png" width="90%" /></p>
+<p><img src="model_files/figure-html/unnamed-chunk-5-1.png" width="90%" /></p>
+<pre class="r"><code>log_log_model |&gt; 
+  broom::tidy() |&gt; 
+  as.data.frame() |&gt; 
+  knitr::kable(digits = 3)</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">term</th>
+<th align="right">estimate</th>
+<th align="right">std.error</th>
+<th align="right">statistic</th>
+<th align="right">p.value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">(Intercept)</td>
+<td align="right">1.467</td>
+<td align="right">0.023</td>
+<td align="right">62.923</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">log1p(runtime)</td>
+<td align="right">-0.041</td>
+<td align="right">0.004</td>
+<td align="right">-10.244</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">log1p(list_appearances)</td>
+<td align="right">0.064</td>
+<td align="right">0.004</td>
+<td align="right">17.896</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">log1p(watches)</td>
+<td align="right">-0.093</td>
+<td align="right">0.002</td>
+<td align="right">-43.168</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">log1p(fans)</td>
+<td align="right">0.064</td>
+<td align="right">0.001</td>
+<td align="right">45.056</td>
+<td align="right">0</td>
+</tr>
+</tbody>
+</table>
 <p>From this we can conclude that a log-log model seems to be the best
 to model the relationship between average rating and runtime, list
 appearances, total watches, and fans.</p>
+<p>*Of note: we used a log(1+p) instead of just log(p) as some 0 values
+would become null once we log-ed it.</p>
 
 
 
