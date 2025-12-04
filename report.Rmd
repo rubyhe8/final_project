@@ -28,7 +28,9 @@ As we did this, we explored how each variable individually was associated with a
 library(tidyverse)
 library(plotly)
 library(patchwork)
+library(mgcv)
 library(modelr)
+library(glmnet)
 
 # Preset settings
 
