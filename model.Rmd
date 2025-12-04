@@ -7,7 +7,7 @@ output:
     code_folding: hide
 ---
 
-This will include all code for building our model 
+
 
 
 ```{r message = FALSE}
@@ -76,10 +76,12 @@ Lasso model chooses the following predictors
 * lowest
 * highest 
 
-Using outside knowledge, we would like to include total number of watches and exclude lowest and highest (number of lowest ratings and number of highest ratings)
+We would like to include total number of watches and exclude lowest and highest (number of lowest ratings and number of highest ratings) as this may be repeatitive with the rating variable. 
 
-linear model
-```{r}
+Previously, in our regression analysis we saw that a linear model seems to not be the most effective in modeling the association between average rating and other variables such as runtime, list appearances, total watches, and fans. Using these variables, we will construct different models to identify what will be the most "optimal" model. 
+
+First let's revisit our linear model from earlier. 
+```{r message = FALSE, warning = FALSE}
 linear_model = lm(average_rating ~ runtime + list_appearances + watches + fans, data = model_movie_df)
 
 
@@ -89,30 +91,21 @@ model_movie_df |>
   ggplot(aes(x = pred, y = resid)) +
   geom_point(alpha = 0.5) +
   geom_hline(yintercept = 0) +
-  geom_smooth(method = "loess", se = FALSE)
+  geom_smooth(method = "loess", se = FALSE) +
+  labs(
+    title = "Residuals vs. Predicted",
+    x = "Predicted",
+    y = "Residuals"
+  )
 
 linear_model |> broom::glance()
 ```
 
+The linear model has very high AIC/BIC values, and low R^2. The plot of residuals and predicted values also seems to be very skewed and not approximately evenly distributed around 0. Given this, if a linear model is not the most "optimal" model, what model should be used?
 
-gam model
-```{r}
-gam_model = gam(average_rating ~ s(runtime) + s(list_appearances) + s(watches) + s(fans), data = model_movie_df)
 
-model_movie_df |> 
-  add_predictions(gam_model) |> 
-  add_residuals(gam_model) |> 
-  ggplot(aes(x = pred, y = resid)) +
-  geom_point(alpha = 0.5) +
-  geom_hline(yintercept = 0) +
-  geom_smooth(method = "loess", se = FALSE)
-
-gam_model |> 
-  broom::glance()
-```
-
-build training and testing tibbles
-```{r}
+We will use cross validation to test a several different modeling options, and try to identify the one with the smallest RMSE. 
+```{r message = FALSE, warning = FALSE}
 cv_df = 
   crossv_mc(model_movie_df, 100) 
 
@@ -127,12 +120,22 @@ cv_df =
   cv_df |> 
   mutate(
     linear_mod  = map(train, \(df) lm(average_rating ~ runtime + list_appearances + watches + fans, data = df)),
-    smooth_mod  = map(train, \(df) gam(average_rating ~ s(runtime) + s(list_appearances) + s(watches) + s(fans), data = df))
+    smooth_mod  = map(train, \(df) gam(average_rating ~ s(runtime) + s(list_appearances) + s(watches) + s(fans), data = df)),
+    log_level_mod = map(train, \(df) lm(log(average_rating) ~ runtime + list_appearances + watches + fans, data = df)),
+    glm_mod = map(train, \(df) glm(average_rating ~ runtime + list_appearances + watches + fans, family = gaussian(link = "log"), data = df)),
+    log_log_mod = map(train, \(df) lm(log(average_rating) ~ log1p(runtime) + log1p(list_appearances) + log1p(watches) + log1p(fans), data = df)),
     ) |> 
   mutate(
     rmse_linear = map2_dbl(linear_mod, test, \(mod, df) rmse(model = mod, data = df)),
-    rmse_smooth = map2_dbl(smooth_mod, test, \(mod, df) rmse(model = mod, data = df)))
-
+    rmse_smooth = map2_dbl(smooth_mod, test, \(mod, df) rmse(model = mod, data = df)),
+    rmse_log_level = map2_dbl(log_level_mod, test, \(mod, df) rmse(model = mod, data = df)),
+  rmse_glm = map2_dbl(
+  glm_mod, test, ~ {preds = predict(.x, newdata = .y, type = "response") 
+  .y |> 
+      mutate(error = average_rating - preds) |> 
+      summarize(rmse = sqrt(mean(error^2))) |> 
+      pull(rmse)}),
+  rmse_log_log = map2_dbl(log_log_mod, test, \(mod, df) rmse(model = mod, data = df)))
 
 cv_df |> 
   select(starts_with("rmse")) |> 
@@ -142,30 +145,49 @@ cv_df |>
     values_to = "rmse",
     names_prefix = "rmse_") |> 
   mutate(model = fct_inorder(model)) |> 
-  ggplot(aes(x = model, y = rmse)) + geom_violin()
+  ggplot(aes(x = model, y = rmse)) + geom_violin() +
+  labs(
+    title = "Root Mean Squared Error Distributions",
+    y = "Model",
+    x = "RMSE"
+  )
+
 ```
 
-we want to use a smooth model > a linear model
-
-* smooth model has lower rmse
-* also seen in the plot of resid vs. pred - the linear model is not evenly distributed across resid = 0
+When comparing a linear, smooth, log-level, log-log, and GLM model, we can see that the linear model has the highest RMSE, while the log-log and log_level model have the lowest RMSE.
 
 
-The optimal model that we think predicts `average_rating` is a generalized additive model containing the following predictors:
+Let's look at the residuals and predicted values plot comparing the log-level and log-log models: 
 
-* runtime 
-* list appearances 
-* watches
-* fans
+```{r message = FALSE, warning = FALSE}
+log_log_model = lm(log(average_rating) ~ log1p(runtime) + log1p(list_appearances) + log1p(watches) + log1p(fans), data = model_movie_df) 
 
-```{r}
-summary(gam_model)
+log_level_model = lm(log(average_rating) ~ runtime + list_appearances + watches + fans, data = model_movie_df)
+
+log_log = model_movie_df |>
+  add_predictions(log_log_model) |>
+  add_residuals(log_log_model) |>
+  mutate(model = "Log-Log Model")
+
+log_level = model_movie_df |>
+  add_predictions(log_level_model) |>
+  add_residuals(log_level_model) |>
+  mutate(model = "Log-Level Model")
+
+combined_df <- bind_rows(log_log, log_level)
+
+ggplot(combined_df, aes(pred, resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, color = "red") +
+  geom_smooth(method = "loess", se = FALSE) +
+  facet_wrap(~ model) +
+  labs(
+    title = "Residuals vs Predicted Across Models",
+    x = "Predicted",
+    y = "Residuals"
+  )
+
 ```
 
-significant p-value suggests that the non-linear relationship between the predictor and the response is statistically significant
 
-if we want to use a linear model 
-```{r}
-summary(linear_model)
-```
-
+From this we can conclude that a log-log model seems to be the best to model the relationship between average rating and runtime, list appearances, total watches, and fans. 

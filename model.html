@@ -391,7 +391,6 @@ div.tocify {
 </div>
 
 
-<p>This will include all code for building our model</p>
 <pre class="r"><code>library(tidyverse)
 library(mgcv)
 library(modelr)
@@ -456,10 +455,15 @@ lasso_fit_opt |&gt;
 <li>lowest</li>
 <li>highest</li>
 </ul>
-<p>Using outside knowledge, we would like to include total number of
-watches and exclude lowest and highest (number of lowest ratings and
-number of highest ratings)</p>
-<p>linear model</p>
+<p>We would like to include total number of watches and exclude lowest
+and highest (number of lowest ratings and number of highest ratings) as
+this may be repeatitive with the rating variable.</p>
+<p>Previously, in our regression analysis we saw that a linear model
+seems to not be the most effective in modeling the association between
+average rating and other variables such as runtime, list appearances,
+total watches, and fans. Using these variables, we will construct
+different models to identify what will be the most “optimal” model.</p>
+<p>First let’s revisit our linear model from earlier.</p>
 <pre class="r"><code>linear_model = lm(average_rating ~ runtime + list_appearances + watches + fans, data = model_movie_df)
 
 
@@ -469,8 +473,12 @@ model_movie_df |&gt;
   ggplot(aes(x = pred, y = resid)) +
   geom_point(alpha = 0.5) +
   geom_hline(yintercept = 0) +
-  geom_smooth(method = &quot;loess&quot;, se = FALSE)</code></pre>
-<pre><code>## `geom_smooth()` using formula = &#39;y ~ x&#39;</code></pre>
+  geom_smooth(method = &quot;loess&quot;, se = FALSE) +
+  labs(
+    title = &quot;Residuals vs. Predicted&quot;,
+    x = &quot;Predicted&quot;,
+    y = &quot;Residuals&quot;
+  )</code></pre>
 <p><img src="model_files/figure-html/unnamed-chunk-4-1.png" width="90%" /></p>
 <pre class="r"><code>linear_model |&gt; broom::glance()</code></pre>
 <pre><code>## # A tibble: 1 × 12
@@ -478,25 +486,12 @@ model_movie_df |&gt;
 ##       &lt;dbl&gt;         &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;
 ## 1     0.191         0.190 0.471      475.       0     4 -5382. 10776. 10818.
 ## # ℹ 3 more variables: deviance &lt;dbl&gt;, df.residual &lt;int&gt;, nobs &lt;int&gt;</code></pre>
-<p>gam model</p>
-<pre class="r"><code>gam_model = gam(average_rating ~ s(runtime) + s(list_appearances) + s(watches) + s(fans), data = model_movie_df)
-
-model_movie_df |&gt; 
-  add_predictions(gam_model) |&gt; 
-  add_residuals(gam_model) |&gt; 
-  ggplot(aes(x = pred, y = resid)) +
-  geom_point(alpha = 0.5) +
-  geom_hline(yintercept = 0) +
-  geom_smooth(method = &quot;loess&quot;, se = FALSE)</code></pre>
-<pre><code>## `geom_smooth()` using formula = &#39;y ~ x&#39;</code></pre>
-<p><img src="model_files/figure-html/unnamed-chunk-5-1.png" width="90%" /></p>
-<pre class="r"><code>gam_model |&gt; 
-  broom::glance()</code></pre>
-<pre><code>## # A tibble: 1 × 9
-##      df logLik   AIC   BIC deviance df.residual  nobs adj.r.squared  npar
-##   &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;       &lt;dbl&gt; &lt;int&gt;         &lt;dbl&gt; &lt;int&gt;
-## 1  35.9 -4238. 8550. 8808.    1351.       8038.  8074         0.388    37</code></pre>
-<p>build training and testing tibbles</p>
+<p>The linear model has very high AIC/BIC values, and low R^2. The plot
+of residuals and predicted values also seems to be very skewed and not
+approximately evenly distributed around 0. Given this, if a linear model
+is not the most “optimal” model, what model should be used?</p>
+<p>We will use cross validation to test a several different modeling
+options, and try to identify the one with the smallest RMSE.</p>
 <pre class="r"><code>cv_df = 
   crossv_mc(model_movie_df, 100) 
 
@@ -511,12 +506,22 @@ cv_df =
   cv_df |&gt; 
   mutate(
     linear_mod  = map(train, \(df) lm(average_rating ~ runtime + list_appearances + watches + fans, data = df)),
-    smooth_mod  = map(train, \(df) gam(average_rating ~ s(runtime) + s(list_appearances) + s(watches) + s(fans), data = df))
+    smooth_mod  = map(train, \(df) gam(average_rating ~ s(runtime) + s(list_appearances) + s(watches) + s(fans), data = df)),
+    log_level_mod = map(train, \(df) lm(log(average_rating) ~ runtime + list_appearances + watches + fans, data = df)),
+    glm_mod = map(train, \(df) glm(average_rating ~ runtime + list_appearances + watches + fans, family = gaussian(link = &quot;log&quot;), data = df)),
+    log_log_mod = map(train, \(df) lm(log(average_rating) ~ log1p(runtime) + log1p(list_appearances) + log1p(watches) + log1p(fans), data = df)),
     ) |&gt; 
   mutate(
     rmse_linear = map2_dbl(linear_mod, test, \(mod, df) rmse(model = mod, data = df)),
-    rmse_smooth = map2_dbl(smooth_mod, test, \(mod, df) rmse(model = mod, data = df)))
-
+    rmse_smooth = map2_dbl(smooth_mod, test, \(mod, df) rmse(model = mod, data = df)),
+    rmse_log_level = map2_dbl(log_level_mod, test, \(mod, df) rmse(model = mod, data = df)),
+  rmse_glm = map2_dbl(
+  glm_mod, test, ~ {preds = predict(.x, newdata = .y, type = &quot;response&quot;) 
+  .y |&gt; 
+      mutate(error = average_rating - preds) |&gt; 
+      summarize(rmse = sqrt(mean(error^2))) |&gt; 
+      pull(rmse)}),
+  rmse_log_log = map2_dbl(log_log_mod, test, \(mod, df) rmse(model = mod, data = df)))
 
 cv_df |&gt; 
   select(starts_with(&quot;rmse&quot;)) |&gt; 
@@ -526,74 +531,48 @@ cv_df |&gt;
     values_to = &quot;rmse&quot;,
     names_prefix = &quot;rmse_&quot;) |&gt; 
   mutate(model = fct_inorder(model)) |&gt; 
-  ggplot(aes(x = model, y = rmse)) + geom_violin()</code></pre>
+  ggplot(aes(x = model, y = rmse)) + geom_violin() +
+  labs(
+    title = &quot;Root Mean Squared Error Distributions&quot;,
+    y = &quot;Model&quot;,
+    x = &quot;RMSE&quot;
+  )</code></pre>
+<p><img src="model_files/figure-html/unnamed-chunk-5-1.png" width="90%" /></p>
+<p>When comparing a linear, smooth, log-level, log-log, and GLM model,
+we can see that the linear model has the highest RMSE, while the log-log
+and log_level model have the lowest RMSE.</p>
+<p>Let’s look at the residuals and predicted values plot comparing the
+log-level and log-log models:</p>
+<pre class="r"><code>log_log_model = lm(log(average_rating) ~ log1p(runtime) + log1p(list_appearances) + log1p(watches) + log1p(fans), data = model_movie_df) 
+
+log_level_model = lm(log(average_rating) ~ runtime + list_appearances + watches + fans, data = model_movie_df)
+
+log_log = model_movie_df |&gt;
+  add_predictions(log_log_model) |&gt;
+  add_residuals(log_log_model) |&gt;
+  mutate(model = &quot;Log-Log Model&quot;)
+
+log_level = model_movie_df |&gt;
+  add_predictions(log_level_model) |&gt;
+  add_residuals(log_level_model) |&gt;
+  mutate(model = &quot;Log-Level Model&quot;)
+
+combined_df &lt;- bind_rows(log_log, log_level)
+
+ggplot(combined_df, aes(pred, resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, color = &quot;red&quot;) +
+  geom_smooth(method = &quot;loess&quot;, se = FALSE) +
+  facet_wrap(~ model) +
+  labs(
+    title = &quot;Residuals vs Predicted Across Models&quot;,
+    x = &quot;Predicted&quot;,
+    y = &quot;Residuals&quot;
+  )</code></pre>
 <p><img src="model_files/figure-html/unnamed-chunk-6-1.png" width="90%" /></p>
-<p>we want to use a smooth model &gt; a linear model</p>
-<ul>
-<li>smooth model has lower rmse</li>
-<li>also seen in the plot of resid vs. pred - the linear model is not
-evenly distributed across resid = 0</li>
-</ul>
-<p>The optimal model that we think predicts <code>average_rating</code>
-is a generalized additive model containing the following predictors:</p>
-<ul>
-<li>runtime</li>
-<li>list appearances</li>
-<li>watches</li>
-<li>fans</li>
-</ul>
-<pre class="r"><code>summary(gam_model)</code></pre>
-<pre><code>## 
-## Family: gaussian 
-## Link function: identity 
-## 
-## Formula:
-## average_rating ~ s(runtime) + s(list_appearances) + s(watches) + 
-##     s(fans)
-## 
-## Parametric coefficients:
-##             Estimate Std. Error t value Pr(&gt;|t|)    
-## (Intercept) 3.210954   0.004562   703.8   &lt;2e-16 ***
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## 
-## Approximate significance of smooth terms:
-##                       edf Ref.df      F p-value    
-## s(runtime)          8.333  8.846  81.89  &lt;2e-16 ***
-## s(list_appearances) 8.793  8.988 200.14  &lt;2e-16 ***
-## s(watches)          9.000  9.000 186.24  &lt;2e-16 ***
-## s(fans)             8.775  8.983  53.77  &lt;2e-16 ***
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## 
-## R-sq.(adj) =  0.388   Deviance explained =   39%
-## GCV = 0.16879  Scale est. = 0.16804   n = 8074</code></pre>
-<p>significant p-value suggests that the non-linear relationship between
-the predictor and the response is statistically significant</p>
-<p>if we want to use a linear model</p>
-<pre class="r"><code>summary(linear_model)</code></pre>
-<pre><code>## 
-## Call:
-## lm(formula = average_rating ~ runtime + list_appearances + watches + 
-##     fans, data = model_movie_df)
-## 
-## Residuals:
-##      Min       1Q   Median       3Q      Max 
-## -2.04642 -0.27131  0.07398  0.31200  1.66101 
-## 
-## Coefficients:
-##                    Estimate Std. Error t value Pr(&gt;|t|)    
-## (Intercept)       2.942e+00  1.572e-02 187.172  &lt; 2e-16 ***
-## runtime           1.577e-03  1.465e-04  10.762  &lt; 2e-16 ***
-## list_appearances  6.758e-06  2.387e-07  28.307  &lt; 2e-16 ***
-## watches          -4.313e-07  2.617e-08 -16.481  &lt; 2e-16 ***
-## fans             -2.294e-06  7.741e-07  -2.963  0.00305 ** 
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## 
-## Residual standard error: 0.4714 on 8069 degrees of freedom
-## Multiple R-squared:  0.1906, Adjusted R-squared:  0.1902 
-## F-statistic: 475.1 on 4 and 8069 DF,  p-value: &lt; 2.2e-16</code></pre>
+<p>From this we can conclude that a log-log model seems to be the best
+to model the relationship between average rating and runtime, list
+appearances, total watches, and fans.</p>
 
 
 
