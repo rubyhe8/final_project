@@ -131,56 +131,74 @@ films_plot = function(df, xvar) {
 watches_plot = 
   films_plot(movie_df, "watches") |> 
   layout(
-    xaxis = list(range = c(0, 1000000))
+    xaxis = list(range = c(0, 1000000), title = ""),
+    yaxis = list(title = "")
   )
 
-#Plot for nans
+#Plot for fans
 fans_plot = 
   films_plot(movie_df, "fans") |> 
   layout(
-    xaxis = list(range = c(0, 50000))
+    xaxis = list(range = c(0, 50000), title = ""),
+    yaxis = list(title = "")
   )
 
 #Plot for number of likes
 likes_plot = 
   films_plot(movie_df, "likes") |> 
   layout(
-    xaxis = list(range = c(0, 500000))
+    xaxis = list(range = c(0, 500000), title = ""),
+    yaxis = list(title = "")
   )
-
 
 #Plot for number of List Appearances
 list_plot = 
   films_plot(movie_df, "list_appearances") |> 
   layout(
-    xaxis = list(range = c(0, 200000))
+    xaxis = list(range = c(0, 200000), title = ""),
+    yaxis = list(title = "")
   )
 
 #Combine plots
 subplot(watches_plot, fans_plot, likes_plot, list_plot, nrows = 4) |> 
   layout(
-    yaxis = list(title = "Count"),
-    yaxis2 = list(title = "Count"),
-    yaxis3 = list(title = "Count"),
-    yaxis4 = list(title = "Count")
+    annotations = 
+      list(
+        list(
+        x = 0.5, y = -0.15,
+        text = "Popularity Metric", xref = "paper", yref = "paper",
+        showarrow = FALSE, font = list(size = 14)
+      ),
+      list(
+        x = -0.12, y = 0.5,
+        text = "Count", textangle = -90,
+        xref = "paper", yref = "paper",
+        showarrow = FALSE, font = list(size = 14)
+      )
+      ),
+    margin = list(b = 60, l = 60)
+      
   )
 ```
 
 We are also interested in exploring a film's popularity metrics, which includes the number of watches, fans, likes, and list appearances. The histograms show that number of watches, fans, likes, and list appearances all follow a heavily right skewed distribution, with most movies centered near the lower end of the scale. Due to the skewdness of these variables, it may be relevant to transform or categorize these variables before conducting further analyses. 
 
-*Note*: Due to the extreme skewdness of the distributions, the plots are zoomed in to better visualize the distribution where most values lie. Users can zoom out to better understand the nature of the skewedness. 
+*Note*: Due to the extreme skewdness of the distributions, the plots are zoomed in to better visualize the distribution where most values lie. Users can zoom out by clicking on "Autoscale" icon on the top right of the figure to better understand the true nature of the skewedness. 
 
 ## Correlation Matrix
 
 ```{r}
+#Select desired predictors 
 vars = 
   movie_df |> 
   select(runtime, watches, likes, fans, list_appearances)
 
+#Calculate correlation coefficients for each pairwise relationship
 cor_matrix =
   cor(vars, use = "complete.obs") |> 
   round(2)
 
+#Create heat map
 plot_ly(
   z = cor_matrix, x = colnames(cor_matrix), y = colnames(cor_matrix),
   type = "heatmap", colors = "Reds"
@@ -190,36 +208,44 @@ plot_ly(
   )
 ```
 
-A heatmap representing the correlation matrix was created to better illustrate the correlation between our possible predictors and assess multicollinearity. Darker red represents a strong relationship between the pair of variables, while the lighter color represent a weaker relationship. Since the scale in the heat map demonstrates that correlatation coefficients are above, this means that all pairs of variables resemble a positive relationship. There appears to be a high collinearity between likes and watches. 
+A heat map representing the correlation matrix was created to better illustrate the correlation between our possible predictors and assess multicollinearity. Darker red represents a strong relationship between the pair of variables, while the lighter color represent a weaker relationship. Since the scale in the heat map demonstrates that correlatation coefficients are above, this means that all pairs of variables resemble a positive relationship. There appears to be a high collinearity between likes and watches. 
 
 ## Bivariate Exploratory Analysis
+
+A bivariate exploratory analysis is conducted to examine relationships between our potential predictors and average rating. 
 
 ### Runtime vs Average Rating
 
 ```{r, message = FALSE}
-#continuous runtime
+#Continuous runtime
 cont_runtime_rating_plot = 
   movie_df |> 
-  ggplot(aes(x = log(runtime), y = average_rating)) +
+  ggplot(aes(x = runtime, y = average_rating)) +
   geom_point(alpha = 0.5) +
-  geom_smooth(se = FALSE) +
+  geom_smooth(method = "lm", se = FALSE) +
   labs (title = "Continuous Runtime\n vs Average Rating",
           x = "Runtime (minutes)", y = "Average Rating")
 
-#categorical runtime
+#Categorical runtime
 runtime_cat_df = 
   movie_df |>
   mutate(runtime_category = case_when(
-    runtime < 100 ~ "Short",
-    runtime >= 100 ~ "Long"
+    runtime < 100 ~ "Short: <100 minutes",
+    runtime >= 100 ~ "Long: ≥100 minutes"
   ))
 
 cat_runtime_rating_plot = 
 runtime_cat_df |> 
   ggplot(aes(x = runtime_category, y = average_rating)) +
   geom_boxplot() +
-  labs (title = "Categorical Runtime\n vs Average Rating",
-          x = "Runtime Group", y = "Average Rating")
+  labs(title = "Categorical Runtime\n vs Average Rating",
+          x = "Runtime", y = "Average Rating") +
+  scale_x_discrete(
+    labels = c(
+      "Short: <100 minutes" = "Short:\n <100 minutes",
+      "Long: ≥100 minutes" = "Long:\n ≥100 minutes"
+    )
+  )
 
 #patchwork
 cont_runtime_rating_plot + cat_runtime_rating_plot
@@ -235,6 +261,10 @@ runtime_cat_df |>
   arrange(desc(n)) |> 
   knitr::kable()
 ```
+
+By operationalizing runtime as a continuous variable, we noticed that the relationship between runtime and average rating does not resemble a linear trend. There is a large clustering of points centered at runtime of around 120 minutes, covering a wide range of average rating, from 1 to above 4.5. There is a clustering near the lower end of runtime, mainly covering average ratings between 3 and 4.5. 
+
+We reoperationalized runtime as a categorical variable, where film runtimes under 100 minutes are considered "short", while runtimes greater than or equal to 100 minutes are classified as "long." We decided to have the cut off at 100 minutes to optimalize equal sample size per group runtime group, shown in the table above. With long runtime group having a median average rating of 3.4 and the short runtime group having a median aveage rating of 3.25, there seems to be minimal difference in average rating between the two runtime groups. 
 
 ### Popularity Metrics vs Average Ratings
 
@@ -258,7 +288,7 @@ movie_df |>
   ) |> 
   ggplot(aes(x = log(value), y = average_rating)) +
   geom_point(aes(color = metric), alpha = 0.5) +
-  geom_smooth(se = FALSE) +
+  geom_smooth(method = "lm", se = FALSE) +
   facet_wrap(vars(metric), nrow = 2) +
   labs(
     x = "log(Value of Metric)",
@@ -267,7 +297,7 @@ movie_df |>
   )
 ```
 
-Popularity metrics includes number of watches, fans, likes, and list appearances.
+Scatterplots between different popularity metrics and average rating were also examined. Due to the skewedness of all of the popularity metric groups, those variables are plotted on the log scale. The scatterplots show that the relationship between fans, likes, list appearances, and watches on the log scale and average rating follow a positive relationship. With increase in all aspects of popularity metrics on the log scale also leads to an increase in average rating.  
 
 ### Average Rating per Genre
 
@@ -281,8 +311,15 @@ genre_df |>
     x = ~genres, y = ~average_rating, color = ~genres,
     type = "box", colors = "viridis",
     showlegend = FALSE
+  ) |> 
+  layout(
+    title = "Average Rating per Genre",
+    xaxis = list(title = "Genres"),
+    yaxis = list(title = "Average Rating")
   )
 ```
+
+A boxplot was created to visualize the average rating per genre. The boxplot shows that horror, science fiction and action have loweer average ratings, with horror having the lowest median average rating of 2.96. On the other hand, a film classified as documentary, music, and history has the highest average ratings, with documentary having a median average rating of 3.59.  
 
 ## High-Performing Films
 
@@ -291,7 +328,7 @@ Distributions for many variables in our dataset are skewed to the right. To expl
 ### Top Rated Films 
 
 ```{r}
-#create function for top film
+#create function for top film tables
 top_film = function(df, variable) {
   
   table = 
@@ -308,16 +345,26 @@ top_film = function(df, variable) {
 top_film(movie_df, average_rating)
 ```
 
+The table shown above represent the top five films based on average rating. *Radiohead: in Rainbows - From the Basement*, directed by David Barnard, has the highest average rating of 4.71. 
+
 ### Top Watched Films
 
 ```{r}
 top_film(movie_df, watches)
 ```
 
+The table shown above represent the top five films based on number of watches. *Barbie*, directed by Greta Gerwig, has the most watches of over 5 million watches. It is also interesting to note that two movies directed by Christopher Nolan, *Interstellar* and *The Dark Knight* are also among the most watched films.  
+
 ### Top Films by List Appearances
 
 ```{r}
 top_film(movie_df, list_appearances)
 ```
+
+The table shown above represent the top five films based on list appearances. *The Dark Knight*, directed by Christopher Nolan, has the most list appearances of over 800,000. Two more movies directed by Christopher Nolan, Interstellar and Oppenheimer, are also among the top films with most list appearances. It is interesting to note that both *The Dark Knight* and *Interstellar* are among the top watched films with most list appearances. 
+
+
+
+
 
 
