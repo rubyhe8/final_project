@@ -1,7 +1,10 @@
 ---
-title: "Final Project Proposal"
-date: "2025-10-31"
-output: github_document
+title: "Proposal"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    code_folding: hide
 ---
 
 ## Director, Genre, and Duration: The Secret to Higher Film Ratings

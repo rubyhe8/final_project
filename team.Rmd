@@ -1,0 +1,21 @@
+---
+title: "Meet the Team"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    code_folding: hide
+---
+
+
+Welcome to our project! Meet the team who put this together.
+
+**Name**
+
+<img src="insertpicofyourfavmoviecharacter.jpg" style="width:25%">
+MPH - dept 
+
+favorite movie
+
+
+^copy paste this template
