@@ -5,12 +5,12 @@ navbar:
   right:
     - text: "About"
       menu:
-        - text: "Data Cleaning"
-          href: "Data-Cleaning.html"
+        - text: "Meet the Team"
+          href: "team.html"
         - text: "Proposal"
           href: "proposal.html"
-        - text: "Meet the Team"
-          href: "team.html" 
+        - text: "Data Cleaning"
+          href: "Data-Cleaning.html" 
     - text: "Exploratory Data Analysis"
       href: eda.html
     - text: "Regression Analysis"

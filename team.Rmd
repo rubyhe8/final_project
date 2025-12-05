@@ -26,15 +26,26 @@ favorite movie
 
 Amanda is a second-year MPH student in the Population & Family Health department with a certificate in Public Health Research Methods. Her favorite movie is *Fantastic Mr. Fox*.
 
+
 **Kallan Roan**
 
 <img src="images/minion.jpg" style="width:20%">
 
 Kallan is a second-year MPH student in the Epidemiology Department with a certificate in Applied Biostatistics and Public Health Data Science. Her favorite movie is *Despicable Me*.
 
+
+
 **Ruby He**
 
 <img src="images/toothless.jpg" style="width:20%">
 
-Ruby is a second-year MPH student in the Epidemiology Department with a certificate in Applied Biostatistics and Public Health Data Science. Her favorite movie is *How to Train Your Dragon*.
+Ruby is a second-year MPH student in the Epidemiology Department with a certificate in Applied Biostatistics and Public Health Data Science. Her favorite movie is *How to Train Your Dragon*. 
+
+
+
+**Satya Batna**
+
+<img src="images/Zoey.jpg" style="width:20%">
+
+Satya is an awesome second-year MPH in the Epidemiology Department with a certificate in Applied Biostatistics and Public Health Data Science. This baddie LOOOVES *Kpop-Demon Hunters* and even dressed up as Zoey for Halloween. 
 

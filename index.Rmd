@@ -6,6 +6,11 @@ output:
     toc_float: true
     theme: cosmo
 ---
+<center>
+
+<img src="images/movie_collage.jpg" style="width:80%">
+
+</center>
 
 Have you ever watched a highly rated film anticipating the most spectacular cinematic experience of a lifetime, but left feeling disappointed and questioning just what led to such a high rating? Have you ever stayed up late at night pondering: just what is the secret ingredient to a highly rated film. Is it because the film's genre was drama? (The most frequently seen movie genre!) Perhaps because the film was directed by a critically acclaimed director? Or maybe it is just as simple as the film was less than 2 hours long. 
 
