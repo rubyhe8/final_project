@@ -262,9 +262,9 @@ runtime_cat_df |>
   knitr::kable()
 ```
 
-By operationalizing runtime as a continuous variable, we noticed that the relationship between runtime and average rating does not resemble a linear trend. There is a large clustering of points centered at runtime of around 120 minutes, covering a wide range of average rating, from 1 to above 4.5. There is a clustering near the lower end of runtime, mainly covering average ratings between 3 and 4.5. 
+By operationalizing runtime as a continuous variable, we noticed that the relationship between runtime and average rating does not resemble a linear trend. There is a large clustering of points centered at runtime of around 100 minutes, covering a wide range of average rating, from 1 to above 4.5. There is also clustering near the lower end of runtime, mainly covering average ratings between 3 and 4.5. 
 
-We reoperationalized runtime as a categorical variable, where film runtimes under 100 minutes are considered "short", while runtimes greater than or equal to 100 minutes are classified as "long." We decided to have the cut off at 100 minutes to optimalize equal sample size per group runtime group, shown in the table above. With long runtime group having a median average rating of 3.4 and the short runtime group having a median aveage rating of 3.25, there seems to be minimal difference in average rating between the two runtime groups. 
+We reoperationalized runtime as a categorical variable, where film runtimes under 100 minutes are considered "short", while runtimes greater than or equal to 100 minutes are classified as "long." We decided to have the cut off at 100 minutes to maintain equal sample size per runtime group, shown in the table above. With long runtime group having a median average rating of 3.4 and the short runtime group having a median aveage rating of 3.25, there seems to be minimal difference in average rating between the two runtime groups. 
 
 ### Popularity Metrics vs Average Ratings
 
@@ -319,11 +319,13 @@ genre_df |>
   )
 ```
 
-A boxplot was created to visualize the average rating per genre. The boxplot shows that horror, science fiction and action have loweer average ratings, with horror having the lowest median average rating of 2.96. On the other hand, a film classified as documentary, music, and history has the highest average ratings, with documentary having a median average rating of 3.59.  
+A boxplot was created to visualize the average rating per genre. The boxplot shows that horror, science fiction and action have lower average ratings, with horror having the lowest median average rating of 2.96. On the other hand, a film classified as documentary, music, and history has the highest average ratings, with documentary having a median average rating of 3.59. Overall, genres with lower ratings tend to wider confidence intervals, while those with higher ratings tend to have narrower confidence intervals.  
+
+Lower median average rating tend to have wider confidence intervals, while higher median average rating have narrower confidence intervals. 
 
 ## High-Performing Films
 
-Distributions for many variables in our dataset are skewed to the right. To explore these films in the dataset, we will create tables of top films based on average rating, list_appearances, and fans. 
+Distributions for many variables in our dataset are skewed to the right. To explore these films in the dataset, we will create tables of top films based on average rating, list_appearances, and watches 
 
 ### Top Rated Films 
 
