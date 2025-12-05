@@ -16,8 +16,8 @@ library(patchwork)
 # Preset settings
 
 knitr::opts_chunk$set(
-  fig.width = 6,
-  fig.asp = .6,
+  fig.width = 7,
+  fig.asp = .7,
   out.width = "90%"
 )
 
@@ -133,32 +133,28 @@ films_plot = function(df, xvar) {
 watches_plot = 
   films_plot(movie_df, "watches") |> 
   layout(
-    xaxis = list(range = c(0, 1000000), title = ""),
-    yaxis = list(title = "")
+    xaxis = list(range = c(0, 1000000))
   )
 
 #Plot for fans
 fans_plot = 
   films_plot(movie_df, "fans") |> 
   layout(
-    xaxis = list(range = c(0, 50000), title = ""),
-    yaxis = list(title = "")
+    xaxis = list(range = c(0, 50000))
   )
 
 #Plot for number of likes
 likes_plot = 
   films_plot(movie_df, "likes") |> 
   layout(
-    xaxis = list(range = c(0, 500000), title = ""),
-    yaxis = list(title = "")
+    xaxis = list(range = c(0, 500000))
   )
 
 #Plot for number of List Appearances
 list_plot = 
   films_plot(movie_df, "list_appearances") |> 
   layout(
-    xaxis = list(range = c(0, 200000), title = ""),
-    yaxis = list(title = "")
+    xaxis = list(range = c(0, 200000))
   )
 
 #Combine plots
@@ -182,6 +178,7 @@ subplot(watches_plot, fans_plot, likes_plot, list_plot, nrows = 4) |>
       
   )
 ```
+
 
 We are also interested in exploring a film's popularity metrics, which includes the number of watches, fans, likes, and list appearances. The histograms show that number of watches, fans, likes, and list appearances all follow a heavily right skewed distribution, with most movies centered near the lower end of the scale. Due to the skewdness of these variables, it may be relevant to transform or categorize these variables before conducting further analyses. 
 

@@ -7,11 +7,11 @@ output:
     code_folding: hide
 ---
 
-### Motivation
+## Motivation
 
 This project was inspired by a shared love and passion for movies. In an era dominated by short-form content and claims of shorter attention spans, we are curious to see if shorter movies tend to receive higher ratings. We also want to explore the secret formulas behind top-rated films: Do certain directors excel when they stick to a specific genre or keep their films under 90 minutes? Beyond that, we are excited to analyze trends in genre preferences and discover what kind of film would captivate audiences.
 
-### Initial Questions
+## Initial Questions
 
 Through our analysis, we are trying to understand what factors contribute to higher ratings of movies. We were initially drawn to this dataset because of the variety of variables it provided. This Letterboxd dataset contained information about movie runtime, movie genre, directors, and a variety of measurements of movie rating and perceived success. We initially were very interested in answering the question of  are films directed by more "famous" directors more likely to have higher ratings? And how does genre play into this? Many directors tend to stick to their niche, and we were curious to see how their films performed when they stayed in their niche or not. We also noted that the dataset contained information about film and production studios, and we wanted to know how ratings would change dependent on bigger more well known studies and smaller lesser known ones. 
 
@@ -19,7 +19,7 @@ Unfortunately this idea met some challenges. Despite our dataset being robust, v
 
 As we did this, we explored how each variable individually was associated with average rating, and shifted our question and curiousity to if these variables together can come together to create a prediction model that is able to accurately estimate the rating of a film based on factors like movie run time, number of watches, the number of times it appears on Letterboxd, and how many watchers identify as fans of the film. 
 
-### Data
+## Data
 
 The Letterboxd dataset was downloaded from Kaggle, an online data science community that provides free public datasets for solving real-world problems. The dataset was downloaded in CSV format and uploaded to a shared GitHUb repository. The original downloaded dataset contained metadeta for 10,002 movies with 16 column variables and was 'clean' in the sense that it had no missing values. However, for the purpose of our analysis, we filtered the dataset to include only English-language films. 
 
@@ -31,7 +31,7 @@ During the data cleaning and preparation phase, we developed subsets of ready-to
 
 Hence, this data cleaning and preparation stage involved extensive experimentation with various variables to determine which ones could be effectively coded and would run properly. Additionally, code snippets that treated variables as either categorical or continuous were provided to enable immediate application in subsequent analyses. As mentioned earlier, we discovered that some variables such as genre, director and studio were more challenging to separate and restructure. While we managed to successfully separate genre, we struggled to establish an appropriate method for handling the director and studio variables. Therefore, we opted to tweak the focus of our research questions and exclude director and studio from our analyses. 
 
-### Exploratory Analysis
+## Exploratory Data Analysis
 
 ```{r include = FALSE}
 # Load libraries
@@ -67,6 +67,8 @@ movie_df = read.csv("data/letterbox_movie_classification_dataset.csv") |>
   select(film_title, director, average_rating, genres, runtime, original_language, description, studios, watches, list_appearances, likes, fans, lowest, medium, highest, total_ratings)
 ```
 
+### Univariate Exploratory Analysis
+
 ```{r}
 # Histogram of average rating
 movie_df |> 
@@ -78,7 +80,9 @@ movie_df |>
     xaxis = list(title = "Average Rating"),
     yaxis = list(title = "Count")
   )
+```
 
+```{r}
 #Histogram of runtime
 movie_df |> 
   plot_ly(x = ~runtime,
@@ -89,8 +93,11 @@ movie_df |>
     xaxis = list(title = "Runtime (minutes)"),
     yaxis = list(title = "Count")
   )
+```
 
-#Histogram of Popularity metrics
+#### Popularity Metrics
+
+```{r}
 #create function to create plots for each variable
 films_plot = function(df, xvar) {
   
@@ -109,32 +116,28 @@ films_plot = function(df, xvar) {
 watches_plot = 
   films_plot(movie_df, "watches") |> 
   layout(
-    xaxis = list(range = c(0, 1000000), title = ""),
-    yaxis = list(title = "")
+    xaxis = list(range = c(0, 1000000))
   )
 
 #Plot for fans
 fans_plot = 
   films_plot(movie_df, "fans") |> 
   layout(
-    xaxis = list(range = c(0, 50000), title = ""),
-    yaxis = list(title = "")
+    xaxis = list(range = c(0, 50000))
   )
 
 #Plot for number of likes
 likes_plot = 
   films_plot(movie_df, "likes") |> 
   layout(
-    xaxis = list(range = c(0, 500000), title = ""),
-    yaxis = list(title = "")
+    xaxis = list(range = c(0, 500000))
   )
 
 #Plot for number of List Appearances
 list_plot = 
   films_plot(movie_df, "list_appearances") |> 
   layout(
-    xaxis = list(range = c(0, 200000), title = ""),
-    yaxis = list(title = "")
+    xaxis = list(range = c(0, 200000))
   )
 
 #Combine plots
@@ -143,7 +146,7 @@ subplot(watches_plot, fans_plot, likes_plot, list_plot, nrows = 4) |>
     annotations = 
       list(
         list(
-        x = 0.5, y = -0.15,
+        x = 0.5, y = -0.08,
         text = "Popularity Metric", xref = "paper", yref = "paper",
         showarrow = FALSE, font = list(size = 14)
       ),
@@ -160,7 +163,7 @@ subplot(watches_plot, fans_plot, likes_plot, list_plot, nrows = 4) |>
 ```
 
 
-We conducted univariate data analysis to better understand the distribution of our variables of interest. We found that the average rating follows a normal distribution. While the distribution for runtime is mainly centered at 100 minutes and skewed slightly to the right, there is a spike in movies centered at around 10 minutes, demonstrating a presence of shorter films in the dataset. However, watches, fans, likes, and appearances are strongly skewed to the right. These findings suggest that either categorizing or transforming these variables may be necessary.
+We conducted univariate data analysis to better understand the distribution of our variables of interest. We found that the average rating follows a normal distribution. While the distribution for runtime is mainly centered at 100 minutes and skewed slightly to the right, there is a spike in movies centered at around 10 minutes, demonstrating a presence of shorter films in the dataset. However, watches, fans, likes, and list appearances are strongly skewed to the right. These findings suggest that either categorizing or transforming these variables may be necessary.
 
 *Note*: Due to the extreme skewdness of the distributions, the popularity metric plots are zoomed in to better visualize the distribution where most values lie. Users can zoom out by clicking on "Autoscale" icon on the top right of the figure to better understand the true nature of the skewedness. 
 
@@ -199,6 +202,8 @@ genre_clean_df |>
 
 Keeping in mind that movies can be classified into more than one genre, the bar charts illustrate counts of genre classification in the dataset. The bar chart shows the top 18 genres in the dataset. Among the 18 most common genres, drama, comedy, and thriller are the most classified genres in the dataset. The complexity in interpretation and the wide variety of different genres present in the dataset influenced our later modeling decision.  
 
+### Correlation Matrix
+
 ```{r}
 #Select desired predictors 
 vars = 
@@ -221,6 +226,8 @@ plot_ly(
 ```
 
 A correlation matrix was constructed to examine multicollinearity among our potential continuous predictors. The heat map represents darker colors as higher correlation coefficients. All pairs have a positive correlation coefficient, with likes and watches having the strongest correlation coefficient of 0.95. To prevent multicollinearity and overfitting our model, we decided to remove likes as a potential predictor when conducting further regression analysis and model building. 
+
+### Bivariate Exploratory Analysis
 
 ```{r, message = FALSE}
 #Continuous runtime
@@ -297,7 +304,7 @@ movie_df |>
   )
 ```
 
-Popularity metrics, which includes number of watches, likes, fans, and list_appearances, were also individually examined with average_rating using scatter plots. We did a log transformation on all popularity metric variables because they were all heavily skewed. The scatterplots revealed a positive association between each log-transformed popularity metric and average_rating. 
+Popularity metrics, which includes number of watches, likes, fans, and list appearances, were also individually examined with average_rating using scatter plots. We did a log transformation on all popularity metric variables because they were all heavily skewed. The scatterplots revealed a positive association between each log-transformed popularity metric and average_rating. 
 
 ```{r}
 genre_df |> 
@@ -319,6 +326,10 @@ genre_df |>
 
 We also examined the average rating for the top 18 genres using boxplots. Documentary, music, and history have the highest median average rating and wider confidence intervals. On the other hand, horror, science fiction, and action have the lowest rating and narrower confidence intervals. Since confidence intervals for all genres were overlapping with one another, the differences between genres are not significant. 
 
+### High-Performing Films
+
+#### Top Rated Film
+
 ```{r}
 #create function for top film tables
 top_film = function(df, variable) {
@@ -334,31 +345,37 @@ top_film = function(df, variable) {
   
 }
 
-#Top rated film
+# top rated film
 top_film(movie_df, average_rating)
 
-#Top watched film
-top_film(movie_df, watches)
-
-#Top film by list appearance
-top_film(movie_df, list_appearances)
 ```
 
+#### Top Watched Film
+
+```{r}
+top_film(movie_df, watches)
+```
+
+#### Top Film by List Appearance
+
+```{r}
+top_film(movie_df, list_appearances)
+```
 
 As the last part of our exploratory data analysis, we created tables showing the top 5 high-performing films based on average rating, list appearances, and number of watches. Since distributions for many variables in our dataset are skewed to the right, we wanted to explore which films were on the right end of the distribution. *Radiohead: in Rainbows - From the Basement*, directed by David Barnard, has the highest average rating of 4.71. Multiple movies directed by Christopher Nolan were also among the top five films based on both list appearances and watches. 
 
 Our exploratory data analysis was informative in helping us understand our dataset and help inform our decision as we moved forward in regression analysis and model building. Due to the many groups of genres in the dataset, and the difficulty in interpretation due to many movies being classified as multiple genres, we decided to remove genres as a possible predictor to predict average rating when doing further regression analysis and model building. While we were initially excited to explore genres as a possible predictor of film ratings, we found that we still had plenty of other predictors that can also yield interesting insights into film ratings. We also removed likes due to multicollinearity when moving forward with regression analysis and model building. These changes will allow us to create the most optimal and interpretable models to predict average rating of film. 
 
+Check out the [Exploratory Data Analysis](eda.html) page for more information. 
 
-
-### Model Building
+## Model Building
 
 After conducting regression analysis, we noticed that there seemed to be a non-linear association between our outcome and the predictors. To dive deeper and understand this better we decided to construct different models and compare them. We first used a lasso technique to see what would statistically be the predictors that should be used. It gave us `runtime`, `list_appearances`, `fans`, `lowest`, and `highest`. This aligns with what we expected, and were mostly the covariates we used in our linear regression models. Despite this, we decided to create models using `runtime`, `list_appearances`, `fans`, and `watches`. 
 
 We calculated room mean squared errors for 5 types of models: linear, smooth, log-level, generalized linear model, and log-log. We can see that linear and GLM models have the highest RMSEs, which is as expected since our regression analysis indicated to us that there is a non-linear relationship between our outcome and predictors. Using some sort of a log scale would work best to model this association as both the log-level and log-log models had comparably low RMSEs. 
 
 
-### Additional Analysis: Linear Models 
+## Additional Analysis: Linear Models 
 
 Across several regression analyses, we wanted to assess how individual movie characteristics of the model relate to a film’s average rating on Letterboxd. We first examined `runtime` as a predictor and found that longer movies were statistically associated with higher ratings. However, upon examining the resulting plot, there was a suggested weak linear trend. Even when applying a log-transformation or dichotomizing `runtime` into short (<100 minutes) and long (≥100 minutes) films, `runtime` remained a difficult variable to model on its own. This suggests that, individually, `runtime` provides limited insight into what drives audience reception.
 
@@ -479,7 +496,7 @@ cv2_df |>
 
 Cross-validation further supported this conclusion, as the covariate-adjusted runtime model yielded the lowest RMSE. This indicated the highest predictive accuracy. Altogether, while `runtime` alone is a weak predictor of perceived movie quality, audience engagement metrics, particularly curated list appearances, emerge as more powerful indicators of how viewers rate the movie. 
 
-### Discussion
+## Discussion
 
 For our additional analyses, our findings suggest that while several characteristics are statistically associated with a movie's rating, `runtime` alone showed a significant but very weak association with higher ratings and lacked a clearly linear visual pattern. In contrast, appearances on user-curated lists `list_appearances`, total `watches`, and `fans` all explained a much greater share of the variance, suggesting that movies with higher visibility and stronger community traction tend to receive higher ratings. The adjusted model that combined all the variables mentioned performed the best, which supports our idea that the more popular a film is the better ratings it will have. 
 
