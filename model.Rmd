@@ -60,7 +60,7 @@ lasso_fit_opt = glmnet(x, y, lambda = lambda_opt)
 lasso_fit_opt |> 
   broom::tidy() |> 
   as.data.frame() |> 
-  knitr::kable(digits = 3)
+  knitr::kable()
   
 ```
 

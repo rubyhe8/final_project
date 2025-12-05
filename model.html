@@ -442,7 +442,7 @@ lasso_fit_opt = glmnet(x, y, lambda = lambda_opt)
 lasso_fit_opt |&gt; 
   broom::tidy() |&gt; 
   as.data.frame() |&gt; 
-  knitr::kable(digits = 3)</code></pre>
+  knitr::kable()</code></pre>
 <table>
 <thead>
 <tr class="header">
@@ -457,44 +457,44 @@ lasso_fit_opt |&gt;
 <tr class="odd">
 <td align="left">(Intercept)</td>
 <td align="right">1</td>
-<td align="right">2.990</td>
+<td align="right">2.9897371</td>
 <td align="right">0.01</td>
-<td align="right">0.327</td>
+<td align="right">0.3266618</td>
 </tr>
 <tr class="even">
 <td align="left">runtime</td>
 <td align="right">1</td>
-<td align="right">0.002</td>
+<td align="right">0.0015011</td>
 <td align="right">0.01</td>
-<td align="right">0.327</td>
+<td align="right">0.3266618</td>
 </tr>
 <tr class="odd">
 <td align="left">list_appearances</td>
 <td align="right">1</td>
-<td align="right">0.000</td>
+<td align="right">0.0000054</td>
 <td align="right">0.01</td>
-<td align="right">0.327</td>
+<td align="right">0.3266618</td>
 </tr>
 <tr class="even">
 <td align="left">fans</td>
 <td align="right">1</td>
-<td align="right">0.000</td>
+<td align="right">-0.0000013</td>
 <td align="right">0.01</td>
-<td align="right">0.327</td>
+<td align="right">0.3266618</td>
 </tr>
 <tr class="odd">
 <td align="left">lowest</td>
 <td align="right">1</td>
-<td align="right">0.000</td>
+<td align="right">-0.0000353</td>
 <td align="right">0.01</td>
-<td align="right">0.327</td>
+<td align="right">0.3266618</td>
 </tr>
 <tr class="even">
 <td align="left">highest</td>
 <td align="right">1</td>
-<td align="right">0.000</td>
+<td align="right">-0.0000005</td>
 <td align="right">0.01</td>
-<td align="right">0.327</td>
+<td align="right">0.3266618</td>
 </tr>
 </tbody>
 </table>
