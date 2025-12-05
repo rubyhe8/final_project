@@ -297,7 +297,7 @@ movie_df |>
   )
 ```
 
-Scatterplots between different popularity metrics and average rating were also examined. Due to the skewedness of all of the popularity metric groups, those variables are plotted on the log scale. The scatterplots show that the relationship between fans, likes, list appearances, and watches on the log scale and average rating follow a positive relationship. With increase in all aspects of popularity metrics on the log scale also leads to an increase in average rating.  
+Scatterplots between different popularity metrics and average rating were also examined. Due to the skewedness of all of the popularity metric groups, those variables are plotted on the log scale. The scatterplots show that the relationship between fans, likes, list appearances, and watches on the log scale and average rating follow a weak positive relationship. With increase in all aspects of popularity metrics on the log scale also leads to an increase in average rating.  
 
 ### Average Rating per Genre
 

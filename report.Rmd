@@ -304,7 +304,7 @@ movie_df |>
   )
 ```
 
-Popularity metrics, which includes number of watches, likes, fans, and list appearances, were also individually examined with average_rating using scatter plots. We did a log transformation on all popularity metric variables because they were all heavily skewed. The scatterplots revealed a positive association between each log-transformed popularity metric and average_rating. 
+Popularity metrics, which includes number of watches, likes, fans, and list appearances, were also individually examined with average_rating using scatter plots. We did a log transformation on all popularity metric variables because they were all heavily skewed. The scatterplots revealed a weak positive association between each log-transformed popularity metric and average_rating. 
 
 ```{r}
 genre_df |> 
