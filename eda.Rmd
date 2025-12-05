@@ -345,6 +345,7 @@ top_film = function(df, variable) {
   
 }
 
+#top rated film
 top_film(movie_df, average_rating)
 ```
 
