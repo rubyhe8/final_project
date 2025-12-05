@@ -20,7 +20,17 @@ navbar:
     - text: "Report"
       href: report.html
     - icon: fa-envelope fa-lg
-      href: mailto:<you@youremail.com>
+      menu:
+        - text: "Satya Batna"
+          href: mailto:<ssb2231@cumc.columbia.edu>
+        - text: "Ruby He"
+          href: mailto:<yh3824@cumc.columbia.edu>
+        - text: "Nicolette Lim"
+          href: mailto:<nrl2142@cumc.columbia.edu>
+        - text: "Kallan Roan"
+          href: mailto:<kr3145@cumc.columbia.edu>
+        - text: "Amanda Sy"
+          href: mailto:<ars2376@cumc.columbia.edu>
     - icon: fa-github fa-lg
       href: https://github.com/rubyhe8/final_project/
 output:
