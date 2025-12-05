@@ -72,7 +72,7 @@ movie_df |>
   )
 ```
 
-We will explore predictors possibly associated with average ratings, starting with film's runtime in minutes. The histogram follows a right skewed distribution, with the tail extending beyond 600 minutes. While the distribution is predominantly centered at around 100 minutes, there is also a spike of films that have runtimes under 20 minutes. 
+We will explore predictors possibly associated with average ratings, starting with film's runtime in minutes. The histogram follows a right skewed distribution, with the tail extending beyond 600 minutes. While the distribution is predominantly centered at around 100 minutes, there is also a spike of films that have runtimes under 10 minutes, demonstrating a presence of shorter films in the dataset.
 
 ### Genre
 
@@ -108,7 +108,9 @@ genre_clean_df |>
   )
 ```
 
-A bar chart was created to show the top 18 film genres represented in the dataset. We can see that drama, comedy, and thriller are the most common genres, with 3346 films classified as dramas, 2620 classified as comedy, and 1940 films classified as thriller. Since movies can be labeled as more than one genre, a  movie can contribute to multiple categories. 
+A bar chart was created to show the top 18 film genres represented in the dataset. Since movies can be labeled as more than one genre, a movie can contribute to multiple categories. Therefore, the bar charts illustrate counts of genre classification in the dataset. We can see that drama, comedy, and thriller are the most common genres, with 3346 films classified as dramas, 2620 classified as comedy, and 1940 films classified as thriller. The complexity in interpretation and the wide variety of different genres present in the dataset influenced our later modeling decision.  
+
+
 
 ### Popularity Metrics
 
@@ -208,7 +210,8 @@ plot_ly(
   )
 ```
 
-A heat map representing the correlation matrix was created to better illustrate the correlation between our possible predictors and assess multicollinearity. Darker red represents a strong relationship between the pair of variables, while the lighter color represent a weaker relationship. Since the scale in the heat map demonstrates that correlatation coefficients are above, this means that all pairs of variables resemble a positive relationship. There appears to be a high collinearity between likes and watches. 
+A heat map representing the correlation matrix was created to examine multicollinearity among our potential continuous predictors. Darker red represents a strong relationship between the pair of variables, while the lighter color represent a weaker relationship. Since the scale in the heat map demonstrates that correlatation coefficients are above 0, meaning that all pairs of variables resemble a positive relationship. There appears to be a high collinearity between likes and watches, with a correlation coefficnet of 0.95. To prevent multicollinearity and overfitting our model, we decided to remove likes as a potential predictor when conducting further regression analysis and model building. 
+
 
 ## Bivariate Exploratory Analysis
 
@@ -319,9 +322,7 @@ genre_df |>
   )
 ```
 
-A boxplot was created to visualize the average rating per genre. The boxplot shows that horror, science fiction and action have lower average ratings, with horror having the lowest median average rating of 2.96. On the other hand, a film classified as documentary, music, and history has the highest average ratings, with documentary having a median average rating of 3.59. Overall, genres with lower ratings tend to wider confidence intervals, while those with higher ratings tend to have narrower confidence intervals.  
-
-Lower median average rating tend to have wider confidence intervals, while higher median average rating have narrower confidence intervals. 
+A boxplot was created to visualize the average rating per genre. The boxplot shows that horror, science fiction and action have lower average ratings, with horror having the lowest median average rating of 2.96. On the other hand, a film classified as documentary, music, and history has the highest average ratings, with documentary having a median average rating of 3.59. Overall, genres with lower ratings tend to wider confidence intervals, while those with higher ratings tend to have narrower confidence intervals. Lower median average rating tend to have wider confidence intervals, while higher median average rating have narrower confidence intervals. Since confidence intervals for all genres were overlapping with one another, the differences between genres are not significant. 
 
 ## High-Performing Films
 

@@ -465,6 +465,75 @@ exclude director and studio from our analyses.</p>
 </div>
 <div id="exploratory-analysis" class="section level3">
 <h3>Exploratory Analysis</h3>
+<p>We conducted univariate data analysis to better understand the
+distribution of our variables of interest. We found that the average
+rating follows a normal distribution. While the distribution for runtime
+is mainly centered at 100 minutes and skewed slightly to the right,
+there is a spike in movies centered at around 10 minutes, demonstrating
+a presence of shorter films in the dataset. However, watches, fans,
+likes, and appearances are strongly skewed to the right. These findings
+suggest that either categorizing or transforming these variables may be
+necessary.</p>
+<p>Keeping in mind that movies can be classified into more than one
+genre, the bar charts illustrate counts of genre classification in the
+dataset. The bar chart shows the top 18 genres in the dataset. Among the
+18 most common genres, drama, comedy, and thriller are the most
+classified genres in the dataset. The complexity in interpretation and
+the wide variety of different genres present in the dataset influenced
+our later modeling decision.</p>
+<p>A correlation matrix was constructed to examine multicollinearity
+among our potential continuous predictors. The heat map represents
+darker colors as higher correlation coefficients. All pairs have a
+positive correlation coefficient, with likes and watches having the
+strongest correlation coefficient of 0.95. To prevent multicollinearity
+and overfitting our model, we decided to remove likes as a potential
+predictor when conducting further regression analysis and model
+building.</p>
+<p>We then conducted bivariate analysis between each predictor and
+average rating to better understand potential trends and patterns. The
+scatterplot representing the association between runtime and average
+rating shows a weak positive relationship. There is a large clustering
+of points centered at runtime of around 100 minutes, covering a wide
+range of average rating. We also reoperationalized runtime as a
+categorical variable, with film runtimes under 100 minutes classified
+under “short”, while runtimes greater than or equal to 100 minutes are
+classified as “long.” Boxplot indcates minimal difference in average
+rating between the two runtime groups.</p>
+<p>Popularity metrics, which includes number of watches, likes, fans,
+and list_appearances, were also individually examined with
+average_rating using scatter plots. We did a log transformation on all
+popularity metric variables because they were all heavily skewed. The
+scatterplots revealed a positive association between each
+log-transformed popularity metric and average_rating.</p>
+<p>We also examined the average rating for the top 18 genres using
+boxplots. Documentary, music, and history have the highest median
+average rating and wider confidence intervals. On the other hand,
+horror, science fiction, and action have the lowest rating and narrower
+confidence intervals. Since confidence intervals for all genres were
+overlapping with one another, the differences between genres are not
+significant.</p>
+<p>As the last part of our exploratory data analysis, we created tables
+showing the top 5 high-performing films based on average rating, list
+appearances, and number of watches. Since distributions for many
+variables in our dataset are skewed to the right, we wanted to explore
+which films were on the right end of the distribution. <em>Radiohead: in
+Rainbows - From the Basement</em>, directed by David Barnard, has the
+highest average rating of 4.71. Multiple movies directed by Christopher
+Nolan were also among the top five films based on both list appearances
+and watches.</p>
+<p>Our exploratory data analysis was informative in helping us
+understand our dataset and help inform our decision as we moved forward
+in regression analysis and model building. Due to the many groups of
+genres in the dataset, and the difficulty in interpretation due to many
+movies being classified as multiple genres, we decided to remove genres
+as a possible predictor to predict average rating when doing further
+regression analysis and model building. While we were initially excited
+to explore genres as a possible predictor of film ratings, we found that
+we still had plenty of other predictors that can also yield interesting
+insights into film ratings. We also removed likes due to
+multicollinearity when moving forward with regression analysis and model
+building. These changes will allow us to create the most optimal and
+interpretable models to predict average rating of film.</p>
 </div>
 <div id="model-building" class="section level3">
 <h3>Model Building</h3>
