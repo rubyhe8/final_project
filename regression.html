@@ -335,13 +335,13 @@ div.tocify {
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="Data-Cleaning.html">Data Cleaning</a>
+      <a href="team.html">Meet the Team</a>
     </li>
     <li>
       <a href="proposal.html">Proposal</a>
     </li>
     <li>
-      <a href="team.html">Meet the Team</a>
+      <a href="Data-Cleaning.html">Data Cleaning</a>
     </li>
   </ul>
 </li>
@@ -610,7 +610,7 @@ class="section level4">
 <h4>Dictotomizing Runtime (above and below 100 mins)</h4>
 <pre class="r"><code>movie_df = movie_df |&gt;
   mutate(
-    runtime_cat = if_else(runtime &lt; 100, &quot;Short (&lt;90 min)&quot;, &quot;Long (≥90 min)&quot;)
+    runtime_cat = if_else(runtime &lt; 100, &quot;Short (&lt;100 min)&quot;, &quot;Long (≥100 min)&quot;)
   )
 runtime_interaction_model = lm(
   average_rating ~ runtime_cat,
@@ -637,7 +637,7 @@ runtime_interaction_model |&gt;
 <td align="left">0.000e+00</td>
 </tr>
 <tr class="even">
-<td align="left">runtime_catShort (&lt;90 min)</td>
+<td align="left">runtime_catShort (&lt;100 min)</td>
 <td align="right">-0.2230601</td>
 <td align="left">2.243e-83</td>
 </tr>
@@ -648,9 +648,9 @@ the model more accurate and better to visualize. <code>runtime</code>
 generally seems to be a difficult variable to analyze given the amount
 of possible outcomes and different run times. However, when included in
 the overall model, it works well as a predictor, and the longer the
-movie, the higher the rating for movies <strong>over 90
+movie, the higher the rating for movies <strong>over 100
 minutes</strong>. In contrast, the longer the movie, the lower the
-rating for movies <strong>under 90 minutes</strong>. This is a
+rating for movies <strong>under 100 minutes</strong>. This is a
 interesting comparision that could be further investigated in future
 analyses.</p>
 </div>
