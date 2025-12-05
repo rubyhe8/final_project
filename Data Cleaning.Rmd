@@ -1,7 +1,10 @@
 ---
 title: "Data Cleaning"
-output: github_document
-date: "2025-11-24"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    code_folding: hide
 ---
 
 ```{r setup, include=FALSE}
@@ -141,7 +144,7 @@ Linear Regression Model to further analyze the relationship between run time and
 runtime_rate_model_cont = lm(average_rating ~ runtime, data = movie_df)
 ```
 
-Linear Regression Model to further analyze the relationship (run time as categorical variable )
+Linear Regression Model to further analyze the relationship between run time and average rating (run time as categorical variable )
 ```{r}
 runtime_rate_model_cat = lm(average_rating ~runtime_category, data = runtime_rate_df)
 ```

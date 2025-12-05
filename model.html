@@ -33,6 +33,7 @@
 <link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
 <script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
 <link href="site_libs/font-awesome-6.5.2/css/all.min.css" rel="stylesheet" />
@@ -221,6 +222,9 @@ $(document).ready(function () {
 </style>
 
 <!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
 
 
 
@@ -323,26 +327,60 @@ div.tocify {
         
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        <li>
-  <a href="about.html">About</a>
+        <li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    About
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="Data-Cleaning.html">Data Cleaning</a>
+    </li>
+    <li>
+      <a href="proposal.html">Proposal</a>
+    </li>
+    <li>
+      <a href="team.html">Meet the Team</a>
+    </li>
+  </ul>
 </li>
 <li>
   <a href="eda.html">Exploratory Data Analysis</a>
 </li>
 <li>
-  <a href="model.html">Model Building</a>
+  <a href="regression.html">Regression Analysis</a>
 </li>
 <li>
-  <a href="regression.html">Regression Analysis</a>
+  <a href="model.html">Model Building</a>
 </li>
 <li>
   <a href="report.html">Report</a>
 </li>
-<li>
-  <a href="mailto:&lt;you@youremail.com&gt;">
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     <span class="fa fa-envelope fa-lg"></span>
      
+     
+    <span class="caret"></span>
   </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="mailto:&lt;ssb2231@cumc.columbia.edu&gt;">Satya Batna</a>
+    </li>
+    <li>
+      <a href="mailto:&lt;yh3824@cumc.columbia.edu&gt;">Ruby He</a>
+    </li>
+    <li>
+      <a href="mailto:&lt;nrl2142@cumc.columbia.edu&gt;">Nicolette Lim</a>
+    </li>
+    <li>
+      <a href="mailto:&lt;kr3145@cumc.columbia.edu&gt;">Kallan Roan</a>
+    </li>
+    <li>
+      <a href="mailto:&lt;ars2376@cumc.columbia.edu&gt;">Amanda Sy</a>
+    </li>
+  </ul>
 </li>
 <li>
   <a href="https://github.com/rubyhe8/final_project/">
@@ -357,6 +395,14 @@ div.tocify {
 
 <div id="header">
 
+<div class="btn-group pull-right float-right">
+<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu dropdown-menu-right" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
 
 
 <h1 class="title toc-ignore">Model Building</h1>
@@ -364,7 +410,6 @@ div.tocify {
 </div>
 
 
-<p>This will include all code for building our model</p>
 <pre class="r"><code>library(tidyverse)
 library(mgcv)
 library(modelr)
@@ -387,17 +432,20 @@ options(
 scale_colour_discrete = scale_colour_viridis_d
 scale_fill_discrete = scale_fill_viridis_d
 
-set.seed(1)</code></pre>
-<p>import in movie_df</p>
-<pre class="r"><code>model_movie_df = read.csv(&quot;data/letterbox_movie_classification_dataset.csv&quot;) |&gt;
+set.seed(1)
+
+model_movie_df = read.csv(&quot;data/letterbox_movie_classification_dataset.csv&quot;) |&gt;
   janitor::clean_names() |&gt;
   filter(original_language == &quot;English&quot;) |&gt;
   select(average_rating, runtime, watches, list_appearances, likes, fans, lowest, medium, highest, total_ratings)</code></pre>
-<p>fit a <code>lasso</code> model using <code>glmnet</code></p>
+<p>To build off of our regression analysis, we were curious to see what
+is the secret recipe to highly rated films. We decided to first fit a
+<code>lasso</code> model using <code>glmnet</code> to give us an idea of
+what variables impact average rating the most.</p>
 <pre class="r"><code>x = model.matrix(average_rating ~ ., model_movie_df) [,-1]
-y = model_movie_df |&gt; pull(average_rating)</code></pre>
-<p><code>lambda</code></p>
-<pre class="r"><code>lambda = 10^(seq(-2, 2.75, 0.1))
+y = model_movie_df |&gt; pull(average_rating)
+
+lambda = 10^(seq(-2, 2.75, 0.1))
 
 lasso_fit = 
   glmnet(x, y, lambda = lambda)
@@ -411,17 +459,66 @@ lambda_opt = lasso_cv[[&quot;lambda.min&quot;]]
 lasso_fit_opt = glmnet(x, y, lambda = lambda_opt) 
 
 lasso_fit_opt |&gt; 
-  broom::tidy()</code></pre>
-<pre><code>## # A tibble: 6 × 5
-##   term              step     estimate lambda dev.ratio
-##   &lt;chr&gt;            &lt;dbl&gt;        &lt;dbl&gt;  &lt;dbl&gt;     &lt;dbl&gt;
-## 1 (Intercept)          1  2.99          0.01     0.327
-## 2 runtime              1  0.00150       0.01     0.327
-## 3 list_appearances     1  0.00000539    0.01     0.327
-## 4 fans                 1 -0.00000135    0.01     0.327
-## 5 lowest               1 -0.0000353     0.01     0.327
-## 6 highest              1 -0.000000477   0.01     0.327</code></pre>
-<p>Lasso model chooses the following predictors</p>
+  broom::tidy() |&gt; 
+  as.data.frame() |&gt; 
+  knitr::kable()</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">term</th>
+<th align="right">step</th>
+<th align="right">estimate</th>
+<th align="right">lambda</th>
+<th align="right">dev.ratio</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">(Intercept)</td>
+<td align="right">1</td>
+<td align="right">2.9897371</td>
+<td align="right">0.01</td>
+<td align="right">0.3266618</td>
+</tr>
+<tr class="even">
+<td align="left">runtime</td>
+<td align="right">1</td>
+<td align="right">0.0015011</td>
+<td align="right">0.01</td>
+<td align="right">0.3266618</td>
+</tr>
+<tr class="odd">
+<td align="left">list_appearances</td>
+<td align="right">1</td>
+<td align="right">0.0000054</td>
+<td align="right">0.01</td>
+<td align="right">0.3266618</td>
+</tr>
+<tr class="even">
+<td align="left">fans</td>
+<td align="right">1</td>
+<td align="right">-0.0000013</td>
+<td align="right">0.01</td>
+<td align="right">0.3266618</td>
+</tr>
+<tr class="odd">
+<td align="left">lowest</td>
+<td align="right">1</td>
+<td align="right">-0.0000353</td>
+<td align="right">0.01</td>
+<td align="right">0.3266618</td>
+</tr>
+<tr class="even">
+<td align="left">highest</td>
+<td align="right">1</td>
+<td align="right">-0.0000005</td>
+<td align="right">0.01</td>
+<td align="right">0.3266618</td>
+</tr>
+</tbody>
+</table>
+<p>We can see that using <code>lasso</code>, the following predictors
+were chosen:</p>
 <ul>
 <li>runtime</li>
 <li>list appearances</li>
@@ -429,10 +526,16 @@ lasso_fit_opt |&gt;
 <li>lowest</li>
 <li>highest</li>
 </ul>
-<p>Using outside knowledge, we would like to include total number of
-watches and exclude lowest and highest (number of lowest ratings and
-number of highest ratings)</p>
-<p>linear model</p>
+<p>We would like to include total number of watches as well as we think
+movies that are watched more and exclude lowest and highest (number of
+lowest ratings and number of highest ratings) as this may be repetitive
+with the rating variable.</p>
+<p>Previously, in our regression analysis we saw that a linear model
+seems to not be the most effective in modeling the association between
+average rating and other variables such as runtime, list appearances,
+total watches, and fans. Using these variables, we will construct
+different models to identify what will be the most “optimal” model.</p>
+<p>First let’s revisit our linear model from earlier.</p>
 <pre class="r"><code>linear_model = lm(average_rating ~ runtime + list_appearances + watches + fans, data = model_movie_df)
 
 
@@ -442,34 +545,71 @@ model_movie_df |&gt;
   ggplot(aes(x = pred, y = resid)) +
   geom_point(alpha = 0.5) +
   geom_hline(yintercept = 0) +
-  geom_smooth(method = &quot;loess&quot;, se = FALSE)</code></pre>
-<pre><code>## `geom_smooth()` using formula = &#39;y ~ x&#39;</code></pre>
-<p><img src="model_files/figure-html/unnamed-chunk-5-1.png" width="90%" /></p>
-<pre class="r"><code>linear_model |&gt; broom::glance()</code></pre>
-<pre><code>## # A tibble: 1 × 12
-##   r.squared adj.r.squared sigma statistic p.value    df logLik    AIC    BIC
-##       &lt;dbl&gt;         &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;
-## 1     0.191         0.190 0.471      475.       0     4 -5382. 10776. 10818.
-## # ℹ 3 more variables: deviance &lt;dbl&gt;, df.residual &lt;int&gt;, nobs &lt;int&gt;</code></pre>
-<p>gam model</p>
-<pre class="r"><code>gam_model = gam(average_rating ~ s(runtime) + s(list_appearances) + s(watches) + s(fans), data = model_movie_df)
-
-model_movie_df |&gt; 
-  add_predictions(gam_model) |&gt; 
-  add_residuals(gam_model) |&gt; 
-  ggplot(aes(x = pred, y = resid)) +
-  geom_point(alpha = 0.5) +
-  geom_hline(yintercept = 0) +
-  geom_smooth(method = &quot;loess&quot;, se = FALSE)</code></pre>
-<pre><code>## `geom_smooth()` using formula = &#39;y ~ x&#39;</code></pre>
-<p><img src="model_files/figure-html/unnamed-chunk-6-1.png" width="90%" /></p>
-<pre class="r"><code>gam_model |&gt; 
-  broom::glance()</code></pre>
-<pre><code>## # A tibble: 1 × 9
-##      df logLik   AIC   BIC deviance df.residual  nobs adj.r.squared  npar
-##   &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;       &lt;dbl&gt; &lt;int&gt;         &lt;dbl&gt; &lt;int&gt;
-## 1  35.9 -4238. 8550. 8808.    1351.       8038.  8074         0.388    37</code></pre>
-<p>build training and testing tibbles</p>
+  geom_smooth(method = &quot;loess&quot;, se = FALSE) +
+  labs(
+    title = &quot;Residuals vs. Predicted&quot;,
+    x = &quot;Predicted&quot;,
+    y = &quot;Residuals&quot;
+  )</code></pre>
+<p><img src="model_files/figure-html/unnamed-chunk-3-1.png" width="90%" /></p>
+<pre class="r"><code>linear_model |&gt; 
+  broom::glance() |&gt; 
+  as.data.frame() |&gt; 
+  knitr::kable(digits = 3)</code></pre>
+<table>
+<colgroup>
+<col width="9%" />
+<col width="13%" />
+<col width="5%" />
+<col width="9%" />
+<col width="7%" />
+<col width="2%" />
+<col width="9%" />
+<col width="8%" />
+<col width="8%" />
+<col width="8%" />
+<col width="11%" />
+<col width="4%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="right">r.squared</th>
+<th align="right">adj.r.squared</th>
+<th align="right">sigma</th>
+<th align="right">statistic</th>
+<th align="right">p.value</th>
+<th align="right">df</th>
+<th align="right">logLik</th>
+<th align="right">AIC</th>
+<th align="right">BIC</th>
+<th align="right">deviance</th>
+<th align="right">df.residual</th>
+<th align="right">nobs</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">0.191</td>
+<td align="right">0.19</td>
+<td align="right">0.471</td>
+<td align="right">475.125</td>
+<td align="right">0</td>
+<td align="right">4</td>
+<td align="right">-5381.935</td>
+<td align="right">10775.87</td>
+<td align="right">10817.85</td>
+<td align="right">1793.061</td>
+<td align="right">8069</td>
+<td align="right">8074</td>
+</tr>
+</tbody>
+</table>
+<p>The linear model has very high AIC/BIC values, and low R². The plot
+of residuals and predicted values also seems to be very skewed and not
+approximately evenly distributed around 0. Given this, if a linear model
+is not the most “optimal” model, what model should be used?</p>
+<p>We will use cross validation to test a several different modeling
+options, and try to identify the one with the smallest RMSE.</p>
 <pre class="r"><code>cv_df = 
   crossv_mc(model_movie_df, 100) 
 
@@ -484,12 +624,22 @@ cv_df =
   cv_df |&gt; 
   mutate(
     linear_mod  = map(train, \(df) lm(average_rating ~ runtime + list_appearances + watches + fans, data = df)),
-    smooth_mod  = map(train, \(df) gam(average_rating ~ s(runtime) + s(list_appearances) + s(watches) + s(fans), data = df))
+    smooth_mod  = map(train, \(df) gam(average_rating ~ s(runtime) + s(list_appearances) + s(watches) + s(fans), data = df)),
+    log_level_mod = map(train, \(df) lm(log(average_rating) ~ runtime + list_appearances + watches + fans, data = df)),
+    glm_mod = map(train, \(df) glm(average_rating ~ runtime + list_appearances + watches + fans, family = gaussian(link = &quot;log&quot;), data = df)),
+    log_log_mod = map(train, \(df) lm(log(average_rating) ~ log1p(runtime) + log1p(list_appearances) + log1p(watches) + log1p(fans), data = df)),
     ) |&gt; 
   mutate(
     rmse_linear = map2_dbl(linear_mod, test, \(mod, df) rmse(model = mod, data = df)),
-    rmse_smooth = map2_dbl(smooth_mod, test, \(mod, df) rmse(model = mod, data = df)))
-
+    rmse_smooth = map2_dbl(smooth_mod, test, \(mod, df) rmse(model = mod, data = df)),
+    rmse_log_level = map2_dbl(log_level_mod, test, \(mod, df) rmse(model = mod, data = df)),
+  rmse_glm = map2_dbl(
+  glm_mod, test, ~ {preds = predict(.x, newdata = .y, type = &quot;response&quot;) 
+  .y |&gt; 
+      mutate(error = average_rating - preds) |&gt; 
+      summarize(rmse = sqrt(mean(error^2))) |&gt; 
+      pull(rmse)}),
+  rmse_log_log = map2_dbl(log_log_mod, test, \(mod, df) rmse(model = mod, data = df)))
 
 cv_df |&gt; 
   select(starts_with(&quot;rmse&quot;)) |&gt; 
@@ -499,74 +649,102 @@ cv_df |&gt;
     values_to = &quot;rmse&quot;,
     names_prefix = &quot;rmse_&quot;) |&gt; 
   mutate(model = fct_inorder(model)) |&gt; 
-  ggplot(aes(x = model, y = rmse)) + geom_violin()</code></pre>
-<p><img src="model_files/figure-html/unnamed-chunk-7-1.png" width="90%" /></p>
-<p>we want to use a smooth model &gt; a linear model</p>
-<ul>
-<li>smooth model has lower rmse</li>
-<li>also seen in the plot of resid vs. pred - the linear model is not
-evenly distributed across resid = 0</li>
-</ul>
-<p>The optimal model that we think predicts <code>average_rating</code>
-is a generalized additive model containing the following predictors:</p>
-<ul>
-<li>runtime</li>
-<li>list appearances</li>
-<li>watches</li>
-<li>fans</li>
-</ul>
-<pre class="r"><code>summary(gam_model)</code></pre>
-<pre><code>## 
-## Family: gaussian 
-## Link function: identity 
-## 
-## Formula:
-## average_rating ~ s(runtime) + s(list_appearances) + s(watches) + 
-##     s(fans)
-## 
-## Parametric coefficients:
-##             Estimate Std. Error t value Pr(&gt;|t|)    
-## (Intercept) 3.210954   0.004562   703.8   &lt;2e-16 ***
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## 
-## Approximate significance of smooth terms:
-##                       edf Ref.df      F p-value    
-## s(runtime)          8.333  8.846  81.89  &lt;2e-16 ***
-## s(list_appearances) 8.793  8.988 200.14  &lt;2e-16 ***
-## s(watches)          9.000  9.000 186.24  &lt;2e-16 ***
-## s(fans)             8.775  8.983  53.77  &lt;2e-16 ***
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## 
-## R-sq.(adj) =  0.388   Deviance explained =   39%
-## GCV = 0.16879  Scale est. = 0.16804   n = 8074</code></pre>
-<p>significant p-value suggests that the non-linear relationship between
-the predictor and the response is statistically significant</p>
-<p>if we want to use a linear model</p>
-<pre class="r"><code>summary(linear_model)</code></pre>
-<pre><code>## 
-## Call:
-## lm(formula = average_rating ~ runtime + list_appearances + watches + 
-##     fans, data = model_movie_df)
-## 
-## Residuals:
-##      Min       1Q   Median       3Q      Max 
-## -2.04642 -0.27131  0.07398  0.31200  1.66101 
-## 
-## Coefficients:
-##                    Estimate Std. Error t value Pr(&gt;|t|)    
-## (Intercept)       2.942e+00  1.572e-02 187.172  &lt; 2e-16 ***
-## runtime           1.577e-03  1.465e-04  10.762  &lt; 2e-16 ***
-## list_appearances  6.758e-06  2.387e-07  28.307  &lt; 2e-16 ***
-## watches          -4.313e-07  2.617e-08 -16.481  &lt; 2e-16 ***
-## fans             -2.294e-06  7.741e-07  -2.963  0.00305 ** 
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## 
-## Residual standard error: 0.4714 on 8069 degrees of freedom
-## Multiple R-squared:  0.1906, Adjusted R-squared:  0.1902 
-## F-statistic: 475.1 on 4 and 8069 DF,  p-value: &lt; 2.2e-16</code></pre>
+  ggplot(aes(x = model, y = rmse)) + geom_violin() +
+  labs(
+    title = &quot;Root Mean Squared Error Distributions&quot;,
+    y = &quot;RMSE&quot;,
+    x = &quot;Model&quot;
+  )</code></pre>
+<p><img src="model_files/figure-html/unnamed-chunk-4-1.png" width="90%" /></p>
+<p>When comparing a linear, smooth, log-level, log-log, and GLM model,
+we can see that the linear model has the highest RMSE, while the log-log
+and log_level model have the lowest RMSE.</p>
+<p>Let’s look at the residuals and predicted values plot comparing the
+log-level and log-log models:</p>
+<pre class="r"><code>log_log_model = lm(log(average_rating) ~ log1p(runtime) + log1p(list_appearances) + log1p(watches) + log1p(fans), data = model_movie_df) 
+
+log_level_model = lm(log(average_rating) ~ runtime + list_appearances + watches + fans, data = model_movie_df)
+
+log_log = model_movie_df |&gt;
+  add_predictions(log_log_model) |&gt;
+  add_residuals(log_log_model) |&gt;
+  mutate(model = &quot;Log-Log Model&quot;)
+
+log_level = model_movie_df |&gt;
+  add_predictions(log_level_model) |&gt;
+  add_residuals(log_level_model) |&gt;
+  mutate(model = &quot;Log-Level Model&quot;)
+
+combined_df &lt;- bind_rows(log_log, log_level)
+
+ggplot(combined_df, aes(pred, resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, color = &quot;red&quot;) +
+  geom_smooth(method = &quot;loess&quot;, se = FALSE) +
+  facet_wrap(~ model) +
+  labs(
+    title = &quot;Residuals vs Predicted Across Models&quot;,
+    x = &quot;Predicted&quot;,
+    y = &quot;Residuals&quot;
+  )</code></pre>
+<p><img src="model_files/figure-html/unnamed-chunk-5-1.png" width="90%" /></p>
+<pre class="r"><code>log_log_model |&gt; 
+  broom::tidy() |&gt; 
+  as.data.frame() |&gt; 
+  knitr::kable(digits = 3)</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">term</th>
+<th align="right">estimate</th>
+<th align="right">std.error</th>
+<th align="right">statistic</th>
+<th align="right">p.value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">(Intercept)</td>
+<td align="right">1.467</td>
+<td align="right">0.023</td>
+<td align="right">62.923</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">log1p(runtime)</td>
+<td align="right">-0.041</td>
+<td align="right">0.004</td>
+<td align="right">-10.244</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">log1p(list_appearances)</td>
+<td align="right">0.064</td>
+<td align="right">0.004</td>
+<td align="right">17.896</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">log1p(watches)</td>
+<td align="right">-0.093</td>
+<td align="right">0.002</td>
+<td align="right">-43.168</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">log1p(fans)</td>
+<td align="right">0.064</td>
+<td align="right">0.001</td>
+<td align="right">45.056</td>
+<td align="right">0</td>
+</tr>
+</tbody>
+</table>
+<p>From this we can conclude that a log-log model seems to be the best
+to model the relationship between average rating and runtime, list
+appearances, total watches, and fans.</p>
+<p>*Of note: we used a log(1+p) instead of just log(p) as some 0 values
+would become null once we log-ed it.</p>
 
 
 
@@ -603,6 +781,11 @@ $(document).ready(function () {
 </script>
 
 <!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
 
 <script>
 $(document).ready(function ()  {

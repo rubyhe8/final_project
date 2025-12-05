@@ -4,11 +4,8 @@ output:
   html_document:
     toc: true
     toc_float: true
+    code_folding: hide
 ---
-
-This will include all code for building our model 
-
-
 ```{r message = FALSE}
 library(tidyverse)
 library(mgcv)
@@ -33,10 +30,7 @@ scale_colour_discrete = scale_colour_viridis_d
 scale_fill_discrete = scale_fill_viridis_d
 
 set.seed(1)
-```
 
-import in movie_df
-```{r}
 model_movie_df = read.csv("data/letterbox_movie_classification_dataset.csv") |>
   janitor::clean_names() |>
   filter(original_language == "English") |>
@@ -44,14 +38,12 @@ model_movie_df = read.csv("data/letterbox_movie_classification_dataset.csv") |>
 ```
 
 
-fit a `lasso` model using `glmnet`
+To build off of our regression analysis, we were curious to see what is the secret recipe to highly rated films. We decided to first fit a `lasso` model using `glmnet` to give us an idea of what variables impact average rating the most.
+
 ```{r}
 x = model.matrix(average_rating ~ ., model_movie_df) [,-1]
 y = model_movie_df |> pull(average_rating)
-```
 
-`lambda`
-```{r}
 lambda = 10^(seq(-2, 2.75, 0.1))
 
 lasso_fit = 
@@ -66,11 +58,13 @@ lambda_opt = lasso_cv[["lambda.min"]]
 lasso_fit_opt = glmnet(x, y, lambda = lambda_opt) 
 
 lasso_fit_opt |> 
-  broom::tidy()
+  broom::tidy() |> 
+  as.data.frame() |> 
+  knitr::kable()
   
 ```
 
-Lasso model chooses the following predictors 
+We can see that using `lasso`, the following predictors were chosen:  
 
 * runtime 
 * list appearances 
@@ -78,10 +72,12 @@ Lasso model chooses the following predictors
 * lowest
 * highest 
 
-Using outside knowledge, we would like to include total number of watches and exclude lowest and highest (number of lowest ratings and number of highest ratings)
+We would like to include total number of watches as well as we think movies that are watched more and exclude lowest and highest (number of lowest ratings and number of highest ratings) as this may be repetitive with the rating variable. 
 
-linear model
-```{r}
+Previously, in our regression analysis we saw that a linear model seems to not be the most effective in modeling the association between average rating and other variables such as runtime, list appearances, total watches, and fans. Using these variables, we will construct different models to identify what will be the most "optimal" model. 
+
+First let's revisit our linear model from earlier. 
+```{r message = FALSE, warning = FALSE}
 linear_model = lm(average_rating ~ runtime + list_appearances + watches + fans, data = model_movie_df)
 
 
@@ -91,30 +87,24 @@ model_movie_df |>
   ggplot(aes(x = pred, y = resid)) +
   geom_point(alpha = 0.5) +
   geom_hline(yintercept = 0) +
-  geom_smooth(method = "loess", se = FALSE)
+  geom_smooth(method = "loess", se = FALSE) +
+  labs(
+    title = "Residuals vs. Predicted",
+    x = "Predicted",
+    y = "Residuals"
+  )
 
-linear_model |> broom::glance()
+linear_model |> 
+  broom::glance() |> 
+  as.data.frame() |> 
+  knitr::kable(digits = 3)
 ```
 
+The linear model has very high AIC/BIC values, and low R². The plot of residuals and predicted values also seems to be very skewed and not approximately evenly distributed around 0. Given this, if a linear model is not the most "optimal" model, what model should be used?
 
-gam model
-```{r}
-gam_model = gam(average_rating ~ s(runtime) + s(list_appearances) + s(watches) + s(fans), data = model_movie_df)
 
-model_movie_df |> 
-  add_predictions(gam_model) |> 
-  add_residuals(gam_model) |> 
-  ggplot(aes(x = pred, y = resid)) +
-  geom_point(alpha = 0.5) +
-  geom_hline(yintercept = 0) +
-  geom_smooth(method = "loess", se = FALSE)
-
-gam_model |> 
-  broom::glance()
-```
-
-build training and testing tibbles
-```{r}
+We will use cross validation to test a several different modeling options, and try to identify the one with the smallest RMSE. 
+```{r message = FALSE, warning = FALSE}
 cv_df = 
   crossv_mc(model_movie_df, 100) 
 
@@ -129,12 +119,22 @@ cv_df =
   cv_df |> 
   mutate(
     linear_mod  = map(train, \(df) lm(average_rating ~ runtime + list_appearances + watches + fans, data = df)),
-    smooth_mod  = map(train, \(df) gam(average_rating ~ s(runtime) + s(list_appearances) + s(watches) + s(fans), data = df))
+    smooth_mod  = map(train, \(df) gam(average_rating ~ s(runtime) + s(list_appearances) + s(watches) + s(fans), data = df)),
+    log_level_mod = map(train, \(df) lm(log(average_rating) ~ runtime + list_appearances + watches + fans, data = df)),
+    glm_mod = map(train, \(df) glm(average_rating ~ runtime + list_appearances + watches + fans, family = gaussian(link = "log"), data = df)),
+    log_log_mod = map(train, \(df) lm(log(average_rating) ~ log1p(runtime) + log1p(list_appearances) + log1p(watches) + log1p(fans), data = df)),
     ) |> 
   mutate(
     rmse_linear = map2_dbl(linear_mod, test, \(mod, df) rmse(model = mod, data = df)),
-    rmse_smooth = map2_dbl(smooth_mod, test, \(mod, df) rmse(model = mod, data = df)))
-
+    rmse_smooth = map2_dbl(smooth_mod, test, \(mod, df) rmse(model = mod, data = df)),
+    rmse_log_level = map2_dbl(log_level_mod, test, \(mod, df) rmse(model = mod, data = df)),
+  rmse_glm = map2_dbl(
+  glm_mod, test, ~ {preds = predict(.x, newdata = .y, type = "response") 
+  .y |> 
+      mutate(error = average_rating - preds) |> 
+      summarize(rmse = sqrt(mean(error^2))) |> 
+      pull(rmse)}),
+  rmse_log_log = map2_dbl(log_log_mod, test, \(mod, df) rmse(model = mod, data = df)))
 
 cv_df |> 
   select(starts_with("rmse")) |> 
@@ -144,30 +144,57 @@ cv_df |>
     values_to = "rmse",
     names_prefix = "rmse_") |> 
   mutate(model = fct_inorder(model)) |> 
-  ggplot(aes(x = model, y = rmse)) + geom_violin()
+  ggplot(aes(x = model, y = rmse)) + geom_violin() +
+  labs(
+    title = "Root Mean Squared Error Distributions",
+    y = "RMSE",
+    x = "Model"
+  )
+
 ```
 
-we want to use a smooth model > a linear model
-
-* smooth model has lower rmse
-* also seen in the plot of resid vs. pred - the linear model is not evenly distributed across resid = 0
+When comparing a linear, smooth, log-level, log-log, and GLM model, we can see that the linear model has the highest RMSE, while the log-log and log_level model have the lowest RMSE.
 
 
-The optimal model that we think predicts `average_rating` is a generalized additive model containing the following predictors:
+Let's look at the residuals and predicted values plot comparing the log-level and log-log models: 
 
-* runtime 
-* list appearances 
-* watches
-* fans
+```{r message = FALSE, warning = FALSE}
+log_log_model = lm(log(average_rating) ~ log1p(runtime) + log1p(list_appearances) + log1p(watches) + log1p(fans), data = model_movie_df) 
+
+log_level_model = lm(log(average_rating) ~ runtime + list_appearances + watches + fans, data = model_movie_df)
+
+log_log = model_movie_df |>
+  add_predictions(log_log_model) |>
+  add_residuals(log_log_model) |>
+  mutate(model = "Log-Log Model")
+
+log_level = model_movie_df |>
+  add_predictions(log_level_model) |>
+  add_residuals(log_level_model) |>
+  mutate(model = "Log-Level Model")
+
+combined_df <- bind_rows(log_log, log_level)
+
+ggplot(combined_df, aes(pred, resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, color = "red") +
+  geom_smooth(method = "loess", se = FALSE) +
+  facet_wrap(~ model) +
+  labs(
+    title = "Residuals vs Predicted Across Models",
+    x = "Predicted",
+    y = "Residuals"
+  )
+
+```
 
 ```{r}
-summary(gam_model)
+log_log_model |> 
+  broom::tidy() |> 
+  as.data.frame() |> 
+  knitr::kable(digits = 3)
 ```
 
-significant p-value suggests that the non-linear relationship between the predictor and the response is statistically significant
+From this we can conclude that a log-log model seems to be the best to model the relationship between average rating and runtime, list appearances, total watches, and fans. 
 
-if we want to use a linear model 
-```{r}
-summary(linear_model)
-```
-
+*Of note: we used a log(1+p) instead of just log(p) as some 0 values would become null once we log-ed it. 
