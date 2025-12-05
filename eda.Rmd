@@ -40,7 +40,7 @@ movie_df = read.csv("data/letterbox_movie_classification_dataset.csv") |>
 
 ## Univariate Exploratory Analysis
 
-To better understand our dataset, we are first going to explore the distributions for each variable of interest: average rating, runtime, genre, watches, fans, likes, and list appearances.
+To better understand our dataset, we are first going to explore the distributions for each variable of interest: `average_rating`, `runtime`, `genres`, `watches`, `fans`, `likes`, and `list_appearances.`
 
 ### Average Rating
 
@@ -56,7 +56,7 @@ movie_df |>
   )
 ```
 
-We are interested in looking at a film's average rating as an outcome variable. The histogram representing movie average ratings follows a normal distribution, centered at around 3.25. 
+We are interested in looking at a film's average rating as an outcome variable. The histogram representing average ratings of films follows a normal distribution, centered at around 3.25. 
 
 ### Runtime
 
@@ -108,8 +108,7 @@ genre_clean_df |>
   )
 ```
 
-A bar chart was created to show the top 18 film genres represented in the dataset. Since movies can be labeled as more than one genre, a movie can contribute to multiple categories. Therefore, the bar charts illustrate counts of genre classification in the dataset. We can see that drama, comedy, and thriller are the most common genres, with 3346 films classified as dramas, 2620 classified as comedy, and 1940 films classified as thriller. The complexity in interpretation and the wide variety of different genres present in the dataset influenced our later modeling decision.  
-
+A bar chart was created to show the top 18 film genres represented in the dataset. Since movies can be labeled as more than one genre, a movie can contribute to multiple categories. Therefore, the bar chart illustrate counts of genre classification in the dataset. We can see that drama, comedy, and thriller are the most common genres, with 3,346 films classified as dramas, 2,620 classified as comedy, and 1,940 films classified as thriller. The complexity in interpretation and the wide variety of different genres present in the dataset influenced our later decision to remove `genres` as a potential predictor of average rating in subsequent regression analysis and model building. 
 
 
 ### Popularity Metrics
@@ -180,9 +179,9 @@ subplot(watches_plot, fans_plot, likes_plot, list_plot, nrows = 4) |>
 ```
 
 
-We are also interested in exploring a film's popularity metrics, which includes the number of watches, fans, likes, and list appearances. The histograms show that number of watches, fans, likes, and list appearances all follow a heavily right skewed distribution, with most movies centered near the lower end of the scale. Due to the skewdness of these variables, it may be relevant to transform or categorize these variables before conducting further analyses. 
+We are also interested in exploring popularity metrics of films, which includes the number of watches, fans, likes, and list appearances. The histograms show that number of watches, fans, likes, and list appearances all follow a heavily right skewed distribution, with most films centered near the lower end of the scale. Due to the skewdness of these variables, it may be relevant to transform or categorize these variables before conducting further analyses. 
 
-*Note*: Due to the extreme skewdness of the distributions, the plots are zoomed in to better visualize the distribution where most values lie. Users can zoom out by clicking on "Autoscale" icon on the top right of the figure to better understand the true nature of the skewedness. 
+*Note*: Due to the extreme skewdness of the distributions, the plots are zoomed in to better visualize the distribution where most values lie. Users can zoom out by clicking on the "Autoscale" icon <img src="images/autoscale.jpg" style="width:3%"> on the top right of the figure to better understand the true nature of the skewedness. 
 
 ## Correlation Matrix
 
@@ -207,7 +206,7 @@ plot_ly(
   )
 ```
 
-A heat map representing the correlation matrix was created to examine multicollinearity among our potential continuous predictors. Darker red represents a strong relationship between the pair of variables, while the lighter color represent a weaker relationship. Since the scale in the heat map demonstrates that correlatation coefficients are above 0, meaning that all pairs of variables resemble a positive relationship. There appears to be a high collinearity between likes and watches, with a correlation coefficnet of 0.95. To prevent multicollinearity and overfitting our model, we decided to remove likes as a potential predictor when conducting further regression analysis and model building. 
+A heat map representing the correlation matrix was created to examine multicollinearity among our potential continuous predictors. Darker red represents a strong relationship between the pair of variables, while the lighter color represent a weaker relationship. Since the scale in the heat map demonstrates that correlation coefficients are above 0, this means that all pairs of variables resemble a positive relationship. There appears to be a high collinearity between likes and watches, with a correlation coefficient of 0.95. To prevent multicollinearity and overfitting our model, we decided to remove `likes` as a potential predictor when conducting further regression analysis and model building. 
 
 
 ## Bivariate Exploratory Analysis
@@ -297,7 +296,7 @@ movie_df |>
   )
 ```
 
-Scatterplots between different popularity metrics and average rating were also examined. Due to the skewedness of all of the popularity metric groups, those variables are plotted on the log scale. The scatterplots show that the relationship between fans, likes, list appearances, and watches on the log scale and average rating follow a weak positive relationship. With increase in all aspects of popularity metrics on the log scale also leads to an increase in average rating.  
+Scatterplots between different popularity metrics and average rating were also examined. Due to the skewedness of all of the popularity metric groups, those variables are plotted on the log scale. The scatterplots show that popularity metrics (fans, likes, list appearances, and watches) on the log scale and average rating follows a weak positive relationship. This means that an increase in all aspects of popularity metrics on the log scale also leads to an increase in average rating.  
 
 ### Average Rating per Genre
 
@@ -319,11 +318,11 @@ genre_df |>
   )
 ```
 
-A boxplot was created to visualize the average rating per genre. The boxplot shows that horror, science fiction and action have lower average ratings, with horror having the lowest median average rating of 2.96. On the other hand, a film classified as documentary, music, and history has the highest average ratings, with documentary having a median average rating of 3.59. Overall, genres with lower ratings tend to wider confidence intervals, while those with higher ratings tend to have narrower confidence intervals. Lower median average rating tend to have wider confidence intervals, while higher median average rating have narrower confidence intervals. Since confidence intervals for all genres were overlapping with one another, the differences between genres are not significant. 
+A boxplot was created to visualize the average rating per genre. The boxplot shows that horror, science fiction and, action have lower average ratings, with horror having the lowest median average rating of 2.96. On the other hand, a film classified as documentary, music, and history has the highest average ratings, with documentary having a median average rating of 3.59. Overall, genres with lower median average ratings tend to have wider confidence intervals, while those with higher median average ratings tend to have narrower confidence intervals. Since confidence intervals of average ratings between all genres overlap with one another, the differences in average ratings between genres are not significant. 
 
 ## High-Performing Films
 
-Distributions for many variables in our dataset are skewed to the right. To explore these films in the dataset, we will create tables of top films based on average rating, list_appearances, and watches 
+Distributions for many variables in our dataset are skewed to the right. To explore these films in the dataset, we will create tables of top films based on average rating, list appearances, and watches 
 
 ### Top Rated Films 
 
@@ -362,7 +361,7 @@ The table shown above represent the top five films based on number of watches. *
 top_film(movie_df, list_appearances)
 ```
 
-The table shown above represent the top five films based on list appearances. *The Dark Knight*, directed by Christopher Nolan, has the most list appearances of over 800,000. Two more movies directed by Christopher Nolan, Interstellar and Oppenheimer, are also among the top films with most list appearances. It is interesting to note that both *The Dark Knight* and *Interstellar* are among the top watched films with most list appearances. 
+The table shown above represent the top five films based on list appearances. *The Dark Knight*, directed by Christopher Nolan, has the most list appearances of over 800,000. Two additional movies directed by Christopher Nolan, Interstellar and Oppenheimer, are also among the top films with most list appearances. It is interesting to note that both *The Dark Knight* and *Interstellar* are among the top films by watches and list appearances. 
 
 
 

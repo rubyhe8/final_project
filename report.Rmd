@@ -163,9 +163,9 @@ subplot(watches_plot, fans_plot, likes_plot, list_plot, nrows = 4) |>
 ```
 
 
-We conducted univariate data analysis to better understand the distribution of our variables of interest. We found that the average rating follows a normal distribution. While the distribution for runtime is mainly centered at 100 minutes and skewed slightly to the right, there is a spike in movies centered at around 10 minutes, demonstrating a presence of shorter films in the dataset. However, watches, fans, likes, and list appearances are strongly skewed to the right. These findings suggest that either categorizing or transforming these variables may be necessary.
+We conducted univariate data analysis to better understand the distribution for each variable of interest: `average_rating`, `runtime`, `genres`, `watches`, `fans`, `likes`, and `list_appearances.` We found that the average rating follows a normal distribution. While the distribution for runtime is mainly centered at 100 minutes and skewed slightly to the right, there is a spike in movies centered at around 10 minutes, demonstrating a presence of shorter films in the dataset. However, watches, fans, likes, and list appearances are strongly skewed to the right. These findings suggest that either categorizing or transforming these variables may be necessary.
 
-*Note*: Due to the extreme skewdness of the distributions, the popularity metric plots are zoomed in to better visualize the distribution where most values lie. Users can zoom out by clicking on "Autoscale" icon on the top right of the figure to better understand the true nature of the skewedness. 
+*Note*: Due to the extreme skewdness of the distributions, the plots are zoomed in to better visualize the distribution where most values lie. Users can zoom out by clicking on the "Autoscale" icon <img src="images/autoscale.jpg" style="width:3%"> on the top right of the figure to better understand the true nature of the skewedness. 
 
 
 ```{r}
@@ -200,7 +200,7 @@ genre_clean_df |>
   )
 ```
 
-Keeping in mind that movies can be classified into more than one genre, the bar charts illustrate counts of genre classification in the dataset. The bar chart shows the top 18 genres in the dataset. Among the 18 most common genres, drama, comedy, and thriller are the most classified genres in the dataset. The complexity in interpretation and the wide variety of different genres present in the dataset influenced our later modeling decision.  
+Keeping in mind that films can be classified into more than one genre, the bar chart illustrates counts of genre classification for the top 18 genres in the dataset. Among the 18 most common genres, drama, comedy, and thriller are the most classified genres in the dataset. The complexity in interpretation and the wide variety of different genres present in the dataset influenced our later decision to remove `genres` as a potential predictor of average rating in subsequent regression analysis and model building. 
 
 ### Correlation Matrix
 
@@ -273,7 +273,7 @@ runtime_cat_df |>
   knitr::kable()
 ```
 
-We then conducted bivariate analysis between each predictor and average rating to better understand potential trends and patterns. The scatterplot representing the association between runtime and average rating shows a weak positive relationship. There is a large clustering of points centered at runtime of around 100 minutes, covering a wide range of average rating. We also reoperationalized runtime as a categorical variable, with film runtimes under 100 minutes classified under "short", while runtimes greater than or equal to 100 minutes are classified as "long." We chose a cutoff of 100 minutes to maintain equal cell sizes. Boxplot indicates minimal difference in average rating between the two runtime groups. 
+We then conducted bivariate analysis between each predictor and average rating to better understand potential trends and patterns. The scatterplot representing the association between runtime and average rating shows a weak positive relationship. There is a large clustering of points centered at runtime of around 100 minutes, covering a wide range of average rating. We also reoperationalized runtime as a categorical variable, with film runtimes under 100 minutes classified under "short", while runtimes greater than or equal to 100 minutes are classified as "long." We chose a cutoff of 100 minutes to maintain equal cell sizes. The boxplot indicates minimal difference in average rating between the two runtime groups. 
 
 ```{r, message = FALSE, warning = FALSE}
 movie_df |> 
@@ -324,7 +324,7 @@ genre_df |>
   )
 ```
 
-We also examined the average rating for the top 18 genres using boxplots. Documentary, music, and history have the highest median average rating and wider confidence intervals. On the other hand, horror, science fiction, and action have the lowest rating and narrower confidence intervals. Since confidence intervals for all genres were overlapping with one another, the differences between genres are not significant. 
+We also examined the average rating for the top 18 genres using boxplots. Documentary, music, and history have the highest median average rating and narrower confidence intervals. On the other hand, horror, science fiction, and action have the lowest rating and wider confidence intervals. Since confidence intervals of average ratings between all genres overlap with one another, the differences in average ratings between genres are not significant. 
 
 ### High-Performing Films
 
