@@ -19,7 +19,7 @@ Unfortunately this idea met some challenges. Despite our dataset being robust, v
 
 As we did this, we explored how each variable individually was associated with average rating, and shifted our question and curiousity to if these variables together can come together to create a prediction model that is able to accurately estimate the rating of a film based on factors like movie run time, number of watches, the number of times it appears on Letterboxd, and how many watchers identify as fans of the film. 
 
-## Data
+## Data Cleaning & Preparation
 
 The Letterboxd dataset was downloaded from Kaggle, an online data science community that provides free public datasets for solving real-world problems. The dataset was downloaded in CSV format and uploaded to a shared GitHUb repository. The original downloaded dataset contained metadeta for 10,002 movies with 16 column variables and was 'clean' in the sense that it had no missing values. However, for the purpose of our analysis, we filtered the dataset to include only English-language films. 
 
