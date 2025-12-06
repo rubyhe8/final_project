@@ -60,6 +60,9 @@ options(
 scale_colour_discrete = scale_colour_viridis_d
 scale_fill_discrete = scale_fill_viridis_d
 
+#set seed
+set.seed(1)
+
 # Import and clean movie dataset
 movie_df = read.csv("data/letterbox_movie_classification_dataset.csv") |>
   janitor::clean_names() |>
@@ -364,16 +367,9 @@ top_film(movie_df, list_appearances)
 
 As the last part of our exploratory data analysis, we created tables showing the top 5 high-performing films based on average rating, list appearances, and number of watches. Since distributions for many variables in our dataset are skewed to the right, we wanted to explore which films were on the right end of the distribution. *Radiohead: in Rainbows - From the Basement*, directed by David Barnard, has the highest average rating of 4.71. Multiple movies directed by Christopher Nolan were also among the top five films based on both list appearances and watches. 
 
-Our exploratory data analysis was informative in helping us understand our dataset and help inform our decision as we moved forward in regression analysis and model building. Due to the many groups of genres in the dataset, and the difficulty in interpretation due to many movies being classified as multiple genres, we decided to remove genres as a possible predictor to predict average rating when doing further regression analysis and model building. While we were initially excited to explore genres as a possible predictor of film ratings, we found that we still had plenty of other predictors that can also yield interesting insights into film ratings. We also removed likes due to multicollinearity when moving forward with regression analysis and model building. These changes will allow us to create the most optimal and interpretable models to predict average rating of film. 
+Our exploratory data analysis was informative in helping us understand our dataset and help inform our decision as we moved forward in regression analysis and model building. Due to the many groups of genres in the dataset, and the difficulty in interpretation due to many movies being classified as multiple genres, we decided to remove genres as a possible predictor to predict average rating when doing further regression analysis and model building. While we were initially excited to explore genres as a possible predictor of film ratings, we found that we still had plenty of other predictors that can also yield interesting insights into film ratings. We also removed `likes` due to multicollinearity when moving forward with regression analysis and model building. These changes will allow us to create the most optimal and interpretable models to predict average rating of film. 
 
-Check out the [Exploratory Data Analysis](eda.html) page for more information. 
-
-## Model Building
-
-After conducting regression analysis, we noticed that there seemed to be a non-linear association between our outcome and the predictors. To dive deeper and understand this better we decided to construct different models and compare them. We first used a lasso technique to see what would statistically be the predictors that should be used. It gave us `runtime`, `list_appearances`, `fans`, `lowest`, and `highest`. This aligns with what we expected, and were mostly the covariates we used in our linear regression models. Despite this, we decided to create models using `runtime`, `list_appearances`, `fans`, and `watches`. 
-
-We calculated room mean squared errors for 5 types of models: linear, smooth, log-level, generalized linear model, and log-log. We can see that linear and GLM models have the highest RMSEs, which is as expected since our regression analysis indicated to us that there is a non-linear relationship between our outcome and predictors. Using some sort of a log scale would work best to model this association as both the log-level and log-log models had comparably low RMSEs. 
-
+Check out the [Exploratory Data Analysis](eda.html) page for more in depth interpretations. 
 
 ## Additional Analysis: Linear Models 
 
@@ -495,6 +491,12 @@ cv2_df |>
 
 
 Cross-validation further supported this conclusion, as the covariate-adjusted runtime model yielded the lowest RMSE. This indicated the highest predictive accuracy. Altogether, while `runtime` alone is a weak predictor of perceived movie quality, audience engagement metrics, particularly curated list appearances, emerge as more powerful indicators of how viewers rate the movie. 
+
+## Model Building
+
+After conducting regression analysis, we noticed that there seemed to be a non-linear association between our outcome and the predictors. To dive deeper and understand this better we decided to construct different models and compare them. We first used a lasso technique to see what would statistically be the predictors that should be used. It gave us `runtime`, `list_appearances`, `fans`, `lowest`, and `highest`. This aligns with what we expected, and were mostly the covariates we used in our linear regression models. Despite this, we decided to create models using `runtime`, `list_appearances`, `fans`, and `watches`. 
+
+We calculated room mean squared errors for 5 types of models: linear, smooth, log-level, generalized linear model, and log-log. We can see that linear and GLM models have the highest RMSEs, which is as expected since our regression analysis indicated to us that there is a non-linear relationship between our outcome and predictors. Using some sort of a log scale would work best to model this association as both the log-level and log-log models had comparably low RMSEs. 
 
 ## Discussion
 
