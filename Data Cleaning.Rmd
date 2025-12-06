@@ -93,7 +93,7 @@ print(top_rated)
 
 ```
 
-EDA - distribution of movie runtimes (please edit the aesthetics of it)
+EDA - distribution of movie runtimes (aesthetics tbc)
 ```{r}
 ggplot(movie_df, aes(x = runtime)) +
   geom_histogram () +
@@ -101,7 +101,7 @@ ggplot(movie_df, aes(x = runtime)) +
         x = "Runtime (minutes)", y = "Count")
 ```
 
-Is this an EDA? - relationship between list appearances and likes (please edit the aesthetics of it)
+Is this an EDA? - relationship between list appearances and likes (aesthetics tbc)
 ```{r}
 ggplot(movie_df, aes(x=list_appearances, y = likes)) +
   geom_point (alpha = 0.5) +
@@ -110,7 +110,7 @@ ggplot(movie_df, aes(x=list_appearances, y = likes)) +
         x = "List Appearances", y = "Likes")
 ```
 
-Is this an EDA? - relationship between runtime and average rating (please edit the aesthetics of it)
+Is this an EDA? - relationship between runtime and average rating (aesthetics tbc)
 ```{r}
 ggplot(movie_df, aes(x=runtime, y=average_rating)) +
   geom_point(alpha=0.5) +
