@@ -10,15 +10,11 @@ output:
 
 Welcome to our project! Meet the team who put this together.
 
-**Name**
+**Nicolette Lim**
 
-<img src="insertpicofyourfavmoviecharacter.jpg" style="width:20%">
-MPH - dept 
+<img src="images/white chicks.jpg" style="width:20%">
 
-favorite movie
-
-
-^copy paste this template
+Nicolette is a second-year MPH student in the Population & Family Health department with a certificate in Applied Biostatistics and Public Health Data Science. Her favourite movie is White Chicks. 
 
 **Amanda Sy**
 
