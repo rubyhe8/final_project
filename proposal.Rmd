@@ -19,7 +19,7 @@ Final products will be a written report, webpage, and screencast. The report wil
 
 ### Data Source 
 
-We will be using this [Letterbox Movie Classification](https://www.kaggle.com/datasets/sahilislam007/letterbox-movie-classification-dataset) dataset from [Kaggle](https://www.kaggle.com/). It has 10,002 observations with 17 variables. Variables that we may be interested in investigating include genre, director, runtime, rating, watches, and likes. 
+We will be using this [Letterbox Movie Classification](https://www.kaggle.com/datasets/sahilislam007/letterbox-movie-classification-dataset) dataset from [Kaggle](https://www.kaggle.com/). It has 10,002 observations with 16 column variables. Variables that we may be interested in investigating include genre, director, runtime, rating, watches, and likes. 
 
 ### Anticipated Analyses/Visualizations/Coding Challenges
 
