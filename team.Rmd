@@ -14,7 +14,7 @@ Welcome to our project! Meet the team who put this together.
 
 <img src="images/white chicks.jpg" style="width:20%">
 
-Nicolette is a second-year MPH student in the Population & Family Health department with a certificate in Applied Biostatistics and Public Health Data Science. Her favourite movie is White Chicks. 
+Nicolette is a second-year MPH student in the Population & Family Health department with a certificate in Applied Biostatistics and Public Health Data Science. Her favourite movie is *White Chicks*. 
 
 **Amanda Sy**
 
